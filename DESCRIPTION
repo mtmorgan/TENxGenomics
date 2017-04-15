@@ -4,7 +4,7 @@ Version: 0.0.4
 Authors@R:
     person(
         "Martin", "Morgan", email = "Martin.Morgan@RoswellPark.org",
-            role = c("aut", "cre")
+        role = c("aut", "cre")
     )
 Description: This package provides an interface to 10x Genomics data,
     in particular the '1.3 million single cell' dataset. Functionality
