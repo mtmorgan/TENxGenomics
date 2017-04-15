@@ -3,16 +3,36 @@
 \docType{methods}
 \name{TENxGenomics}
 \alias{TENxGenomics}
+\alias{dim,TENxGenomics-method}
+\alias{dimnames,TENxGenomics-method}
+\alias{[,TENxGenomics-method}
+\alias{[,TENxGenomics,ANY,ANY-method}
 \alias{show,TENxGenomics-method}
 \title{Create and manipulate a reference to 10xGenomics data.}
 \usage{
 TENxGenomics(h5path)
+
+\S4method{dim}{TENxGenomics}(x)
+
+\S4method{dimnames}{TENxGenomics}(x)
+
+\S4method{[}{TENxGenomics}(x, i, j, ..., drop = TRUE)
 
 \S4method{show}{TENxGenomics}(object)
 }
 \arguments{
 \item{h5path}{character(1) file path to the
 1M_neurons_filtered_gene_bc_matrices_h5.h5 file.}
+
+\item{x}{A \code{TENxGenomics-class} instance.}
+
+\item{i}{integer() or numeric() index into rows of \code{x}.}
+
+\item{j}{integer() or numeric() index into columns of \code{x}.}
+
+\item{...}{Additional arguments, ignored.}
+
+\item{drop}{logical(1) TRUE only.}
 
 \item{object}{A \code{TENxGenomics-class} instance.}
 }
