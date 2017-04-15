@@ -126,6 +126,9 @@ setMethod("dimnames", "TENxGenomics",
 .subset_from_logical <-
     function(x, idx, i)
 {
+    if (length(i) > length(idx))
+        stop("logical subscript too long")
+    which(rep(i, length=length(idx)))
 }
 
 .subset_as_integer <-
@@ -149,11 +152,11 @@ setMethod("dimnames", "TENxGenomics",
 #'
 #' @param x A \code{TENxGenomics-class} instance.
 #'
-#' @param i integer(), numeric(), or character() index into rows of
-#'     \code{x}.
+#' @param i integer(), numeric(), character(), or logical() index into
+#'     rows of \code{x}.
 #'
-#' @param j integer(), numeric(), or character() index into columns of
-#'     \code{x}.
+#' @param j integer(), numeric(), character(), or logical() index into
+#'     columns of \code{x}.
 #'
 #' @param drop logical(1) TRUE only.
 #'

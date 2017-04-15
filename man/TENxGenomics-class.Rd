@@ -26,11 +26,11 @@ TENxGenomics(h5path)
 
 \item{x}{A \code{TENxGenomics-class} instance.}
 
-\item{i}{integer(), numeric(), or character() index into rows of
-\code{x}.}
+\item{i}{integer(), numeric(), character(), or logical() index into
+rows of \code{x}.}
 
-\item{j}{integer(), numeric(), or character() index into columns of
-\code{x}.}
+\item{j}{integer(), numeric(), character(), or logical() index into
+columns of \code{x}.}
 
 \item{...}{Additional arguments, ignored.}
 
