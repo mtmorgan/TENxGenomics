@@ -6,7 +6,16 @@
     slots = c(
         h5path = "character",
         colidx = "integer",
-        rowidx = "integer"
+        rowidx = "integer",
+        ## internal
+        dataname = "character",
+        rowname = "character",
+        colname = "character"
+    ),
+    prototype = prototype(
+        dataname = "/mm10/data",
+        rowname = "/mm10/genes",
+        colname = "/mm10/barcodes"
     )
 )
 
@@ -16,6 +25,12 @@
 
 .rowidx <- function(x) x@rowidx
 
+.dataname <- function(x) x@dataname
+
+.rowname <- function(x) x@rowname
+
+.colname <- function(x) x@colname
+
 .h5_dimidx <-
     function(h5f, name)
 {
@@ -23,22 +38,6 @@
     on.exit(H5Dclose(h5d))
     n <- H5Sget_simple_extent_dims(H5Dget_space(h5d))$size
     seq_len(n)
-}
-
-.h5_colidx <- function(h5f) .h5_dimidx(h5f, "/mm10/barcodes")
-
-.h5_rowidx <- function(h5f) .h5_dimidx(h5f, "/mm10/genes")
-
-.h5_dimnames <-
-    function(h5f, rowidx, colidx)
-{
-    h5d <- H5Dopen(h5f, "/mm10/barcodes")
-    on.exit(H5Dclose(h5d))
-browser()
-    list(
-        h5read(h5f, "/mm10/genes", colidx),
-        h5read(h5f, "/mm10/barcodes", colidx)
-    )
 }
 
 #' @rdname TENxGenomics-class
@@ -68,10 +67,12 @@ TENxGenomics <-
 
     h5f <- H5Fopen(h5path)
     on.exit(H5Fclose(h5f))
-    colidx <- .h5_colidx(h5f)
-    rowidx <- .h5_rowidx(h5f)
 
-    .TENxGenomics(h5path = h5path, colidx = colidx, rowidx = rowidx)
+    tmpl <- .TENxGenomics()
+    rowidx <- .h5_dimidx(h5f, .rowname(tmpl))
+    colidx <- .h5_dimidx(h5f, .colname(tmpl))
+
+    .TENxGenomics(tmpl, h5path = h5path, rowidx = rowidx, colidx = colidx)
 }
 
 ##
@@ -103,8 +104,8 @@ setMethod("dimnames", "TENxGenomics",
     on.exit(H5Fclose(h5f))
 
     list(
-        h5read(h5f, "/mm10/genes", index=list(.rowidx(x))),
-        h5read(h5f, "/mm10/barcodes", index=list(.colidx(x)))
+        as.character(h5read(h5f, .rowname(x), index=list(.rowidx(x)))),
+        as.character(h5read(h5f, .colname(x), index=list(.colidx(x))))
     )
 })
 
@@ -112,37 +113,33 @@ setMethod("dimnames", "TENxGenomics",
 ## Subset
 ##
 
-.subset_i_from_character <-
-    function(x, i)
+.subset_from_character <-
+    function(x, name, idx, i)
+{
+    h5f <- H5Fopen(.h5path(x))
+    on.exit(H5Fclose(h5f))
+
+    names <- h5read(h5f, name, index = list(idx))
+    match(i, names)
+}
+
+.subset_from_logical <-
+    function(x, idx, i)
 {
 }
 
-.subset_i_as_integer <-
-    function(x, idx)
+.subset_as_integer <-
+    function(x, name, idx, i)
 {
-    if (missing(idx))
-        return(.rowidx(x))
+    if (missing(i))
+        return(idx)
     switch(
-        class(idx),
-        integer = idx,
-        numeric = as.integer(idx),
-        character = .subset_i_from_character(x, idx),
-        logical = .subset_i_from_logical(x, idx)
-    )
-}
-
-.subset_j_as_integer <-
-    function(x, idx)
-{
-    if (missing(idx))
-        return(.colidx(x))
-
-    switch(
-        class(idx),
-        integer = idx,
-        numeric = as.integer(idx),
-        character = .subset_i_from_character(x, idx),
-        logical = .subset_i_from_logical(x, idx)
+        class(i),
+        integer = i,
+        numeric = as.integer(i),
+        character = .subset_from_character(x, name, idx, i),
+        logical = .subset_from_logical(x, idx, i),
+        default = stop("unsupport subset class ", class(i))
     )
 }
 
@@ -152,9 +149,11 @@ setMethod("dimnames", "TENxGenomics",
 #'
 #' @param x A \code{TENxGenomics-class} instance.
 #'
-#' @param i integer() or numeric() index into rows of \code{x}.
+#' @param i integer(), numeric(), or character() index into rows of
+#'     \code{x}.
 #'
-#' @param j integer() or numeric() index into columns of \code{x}.
+#' @param j integer(), numeric(), or character() index into columns of
+#'     \code{x}.
 #'
 #' @param drop logical(1) TRUE only.
 #'
@@ -166,8 +165,8 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
 {
     stopifnot(identical(drop, TRUE))
 
-    i <- .subset_i_as_integer(x, i)
-    j <- .subset_j_as_integer(x, j)
+    i <- .subset_as_integer(x, .rowname(x), .rowidx(x), i)
+    j <- .subset_as_integer(x, .colname(x), .colidx(x), j)
     stopifnot(all(i %in% .rowidx(x)), all(j %in% .colidx(x)))
 
     initialize(x, rowidx = .rowidx(x)[i], colidx = .colidx(x)[j])
@@ -186,7 +185,7 @@ setMethod("show", "TENxGenomics",
     cat(
         "class:", class(object),
         "\nh5path:", .h5path(object),
-        "\ndim:", nrow(object), "x", ncol(object),
+        "\ndim():", nrow(object), "x", ncol(object),
         "\n"
     )
 })
