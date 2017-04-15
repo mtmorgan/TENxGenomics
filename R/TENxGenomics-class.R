@@ -201,13 +201,10 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
         h5f, "/mm10/indptr", list(cidx), bit64conversion = "double"
     )
 
-    endidx <- cidx
-    query <- endidx != indlen
-    endidx[query] <- h5read(
-        h5f, "/mm10/indptr", list(endidx[query] + 1L),
+    endidx <- h5read(                   # indptr contains the last index, too
+        h5f, "/mm10/indptr", list(endidx + 1L),
         bit64conversion = "double"
     ) - 1L
-    endidx[!query] <- indlen
 
     idx <- Map(seq, startidx, endidx, MoreArgs=list(by = 1))
     lens <- lengths(idx)
@@ -216,7 +213,7 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
         h5f, "/mm10/indices", list(idx), bit64conversion = "double"
     ) + 1L
 
-    ## get values for rows and columns of interest
+    ## get values for rows of interest
     keep <- ridx %in% .rowidx(x)
     idx <- idx[keep]
     values <- h5read(h5f, "/mm10/data", index=list(idx))
