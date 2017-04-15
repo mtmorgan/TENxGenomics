@@ -5,8 +5,9 @@
 \alias{TENxGenomics}
 \alias{dim,TENxGenomics-method}
 \alias{dimnames,TENxGenomics-method}
-\alias{[,TENxGenomics-method}
 \alias{[,TENxGenomics,ANY,ANY-method}
+\alias{as.matrix.TENxGenomics}
+\alias{coerce,TENxGenomics,matrix-method}
 \alias{show,TENxGenomics-method}
 \title{Create and manipulate a reference to 10xGenomics data.}
 \usage{
@@ -16,7 +17,9 @@ TENxGenomics(h5path)
 
 \S4method{dimnames}{TENxGenomics}(x)
 
-\S4method{[}{TENxGenomics}(x, i, j, ..., drop = TRUE)
+\S4method{[}{TENxGenomics,ANY,ANY}(x, i, j, ..., drop = TRUE)
+
+\method{as.matrix}{TENxGenomics}(x, ..., withDimnames = TRUE)
 
 \S4method{show}{TENxGenomics}(object)
 }
@@ -36,11 +39,21 @@ columns of \code{x}.}
 
 \item{drop}{logical(1) TRUE only.}
 
+\item{withDimnames}{logical(1) Include dimnames on returned matrix?}
+
 \item{object}{A \code{TENxGenomics-class} instance.}
 }
 \value{
 \code{TENxGenomics()} returns a \code{TENxGenomics-class}
     instance.
+
+\code{as.matrix(tenx)} and \code{as(tenx, "matrix")} return
+    a matrix with dim and dimnames equal to \code{tenx}, and values
+    the read counts overlapping corresponding genes and
+    samples. Use \code{as.matrix(withDimnames=FALSE)} to suppress
+    dimnames on the returned matrix. NOTE: consider the size of the
+    matrix, \code{prod(as.numeric(dim(tenx)))} before invoking this
+    function.  #' @export
 }
 \description{
 The TENxGenomics class provides a simple interface to
