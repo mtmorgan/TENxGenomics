@@ -202,7 +202,7 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
     )
 
     endidx <- h5read(                   # indptr contains the last index, too
-        h5f, "/mm10/indptr", list(endidx + 1L),
+        h5f, "/mm10/indptr", list(cidx + 1L),
         bit64conversion = "double"
     ) - 1L
 
