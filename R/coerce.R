@@ -42,6 +42,7 @@
     idx <- idx[keep]
     values <- h5read(h5f, "/mm10/data", index=list(idx))
     ridx <- match(ridx, .rowidx(x))[keep]
+    cidx <- rep(seq_along(cidx), lens)[keep]
 
     if (sparse) {
         ## It is more (memory) efficient to supply i and p, rather
@@ -51,11 +52,9 @@
         ## j = cidx: length(j) == length(values)
         ## p = c(startidx, endidx[length(endidx)] + 1L):
         ##     length(p) == (ncol(x) + 1)
-        i <- ridx
-        p <- c(startidx, endidx[length(endidx)] + 1L)
-        list(values = values, i = i, p = p)
+        p <- c(0, cumsum(tabulate(cidx)))
+        list(values = values, i = ridx, p = p)
     } else {
-        cidx <- rep(seq_along(cidx), lens)[keep]
         list(values = values, ridx = ridx, cidx = cidx)
     }
 }
