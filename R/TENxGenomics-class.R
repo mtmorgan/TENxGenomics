@@ -181,7 +181,7 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
 ##
 
 # Helper for common logic underlying .as.matrix() and .as.sparseMatrix()
-.getValuesAndIndex <-
+.getValuesAndIndices <-
   function(x, sparse = FALSE, ..., withDimnames=TRUE)
 {
     stopifnot(
@@ -239,7 +239,7 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
 .as.matrix <-
     function(x, ..., withDimnames=TRUE)
 {
-      val_and_idx <- .getValuesAndIndex(x=x, sparse=FALSE, ...,
+      val_and_idx <- .getValuesAndIndices(x=x, sparse=FALSE, ...,
                                         withDimnames=withDimnames)
       values <- val_and_idx[["values"]]
       ridx <- val_and_idx[["ridx"]]
@@ -251,6 +251,7 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
         dimnames = if (withDimnames) dimnames(x) else list(NULL, NULL)
       )
       m[cbind(ridx, cidx)] <- values
+      m
 }
 
 .as.dgCMatrix <-
@@ -258,7 +259,7 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
 {
     # TODO: Support withDimnames
     stopifnot(withDimnames)
-    val_and_idx <- .getValuesAndIndex(x, sparse = TRUE, ...,
+    val_and_idx <- .getValuesAndIndices(x, sparse = TRUE, ...,
                                       withDimnames = withDimnames)
     values <- val_and_idx[["values"]]
     i <- val_and_idx[["i"]]
@@ -295,6 +296,11 @@ as.matrix.TENxGenomics <- .as.matrix
 #' @exportMethod coerce
 setAs("TENxGenomics", "matrix", function(from) .as.matrix(from))
 
+# NOTE: This uses a dgCMatrix, a compressed, sparse, column-oriented numeric
+#       (double) matrix. What we really want to use to store these data is a
+#       igCMatrix, a compressed, sparse, column-oriented *integer* matrix.
+#       However, the igCMatrix class, while defined in the Matrix package, is
+#       not actually implemented.
 #' @rdname TENxGenomics-class
 #'
 #' @name coerce,TENxGenomics,dgCMatrix-method
