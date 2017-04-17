@@ -2,6 +2,7 @@
 
 S3method(as.matrix,TENxGenomics)
 export(TENxGenomics)
+export(tenxreduce)
 exportMethods("[")
 exportMethods(coerce)
 exportMethods(dim)
@@ -9,3 +10,5 @@ exportMethods(dimnames)
 exportMethods(show)
 import(methods)
 import(rhdf5)
+importFrom(utils,setTxtProgressBar)
+importFrom(utils,txtProgressBar)
