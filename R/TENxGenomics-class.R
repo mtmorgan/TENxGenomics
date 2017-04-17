@@ -258,7 +258,8 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
 {
     # TODO: Support withDimnames
     stopifnot(withDimnames)
-    val_and_idx <- .getValuesAndIndex(x, ..., withDimnames = withDimnames)
+    val_and_idx <- .getValuesAndIndex(x, sparse = TRUE, ...,
+                                      withDimnames = withDimnames)
     values <- val_and_idx[["values"]]
     i <- val_and_idx[["i"]]
     p <- val_and_idx[["p"]]
