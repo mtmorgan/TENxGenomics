@@ -253,7 +253,7 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
       m[cbind(ridx, cidx)] <- values
 }
 
-.as.CsparseMatrix <-
+.as.dgCMatrix <-
   function(x, ..., withDimnames=TRUE)
 {
     # TODO: Support withDimnames
@@ -297,10 +297,10 @@ setAs("TENxGenomics", "matrix", function(from) .as.matrix(from))
 
 #' @rdname TENxGenomics-class
 #'
-#' @name coerce,TENxGenomics,CsparseMatrix-method
+#' @name coerce,TENxGenomics,dgCMatrix-method
 #'
 #' @exportMethod coerce
-setAs("TENxGenomics", "CsparseMatrix", function(from) .as.CsparseMatrix(from))
+setAs("TENxGenomics", "dgCMatrix", function(from) .as.dgCMatrix(from))
 
 ##
 ## show

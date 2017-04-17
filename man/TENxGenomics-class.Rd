@@ -9,7 +9,7 @@
 \alias{[,TENxGenomics,ANY,ANY-method}
 \alias{as.matrix.TENxGenomics}
 \alias{coerce,TENxGenomics,matrix-method}
-\alias{coerce,TENxGenomics,CsparseMatrix-method}
+\alias{coerce,TENxGenomics,dgCMatrix-method}
 \alias{show,TENxGenomics-method}
 \title{Create and manipulate a reference to 10xGenomics data.}
 \usage{
