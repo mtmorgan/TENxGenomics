@@ -5,10 +5,11 @@
 \alias{TENxGenomics}
 \alias{dim,TENxGenomics-method}
 \alias{dimnames,TENxGenomics-method}
-\alias{[,TENxGenomics-method}
+\alias{[,TENxGenomics,ANY,ANY,ANY-method}
 \alias{[,TENxGenomics,ANY,ANY-method}
 \alias{as.matrix.TENxGenomics}
 \alias{coerce,TENxGenomics,matrix-method}
+\alias{coerce,TENxGenomics,CsparseMatrix-method}
 \alias{show,TENxGenomics-method}
 \title{Create and manipulate a reference to 10xGenomics data.}
 \usage{
@@ -18,7 +19,7 @@ TENxGenomics(h5path)
 
 \S4method{dimnames}{TENxGenomics}(x)
 
-\S4method{[}{TENxGenomics}(x, i, j, ..., drop = TRUE)
+\S4method{[}{TENxGenomics,ANY,ANY,ANY}(x, i, j, ..., drop = TRUE)
 
 \method{as.matrix}{TENxGenomics}(x, ..., withDimnames = TRUE)
 

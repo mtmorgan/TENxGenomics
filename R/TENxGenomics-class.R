@@ -1,5 +1,6 @@
 #' @import methods
 #' @import rhdf5
+#' @import Matrix
 
 .TENxGenomics <- setClass(
     "TENxGenomics",
@@ -161,7 +162,7 @@ setMethod("dimnames", "TENxGenomics",
 #' @param drop logical(1) TRUE only.
 #'
 #' @param ... Additional arguments, ignored.
-#' 
+#'
 #' @exportMethod [
 setMethod("[", c("TENxGenomics", "ANY", "ANY"),
     function(x, i, j, ..., drop = TRUE)
@@ -179,8 +180,9 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
 ## coerce
 ##
 
-.as.matrix <-
-    function(x, ..., withDimnames=TRUE)
+# Helper for common logic underlying .as.matrix() and .as.sparseMatrix()
+.getValuesAndIndex <-
+  function(x, sparse = FALSE, ..., withDimnames=TRUE)
 {
     stopifnot(
         is.logical(withDimnames), length(withDimnames) == 1L,
@@ -217,17 +219,55 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
     keep <- ridx %in% .rowidx(x)
     idx <- idx[keep]
     values <- h5read(h5f, "/mm10/data", index=list(idx))
-    cidx <- rep(seq_along(cidx), lens)[keep]
     ridx <- match(ridx, .rowidx(x))[keep]
+    if (sparse) {
+      # It is more (memory) efficient to supply i and p, rather than i and j,
+      # to Matrix::sparseMatrix():
+      # i = ridx: length(i) == length(values)
+      # j = cidx: length(j) == length(values)
+      # p = c(startidx, endidx[length(endidx)] + 1L): length(p) == (ncol(x) + 1)
+      i <- ridx
+      p <- c(startidx, endidx[length(endidx)] + 1L)
+      return(list(values = values, i = i, p = p))
+    }
+    cidx <- rep(seq_along(cidx), lens)[keep]
 
-    ## formulate result as matrix
-    m <- matrix(
+    list(values = values, ridx = ridx, cidx = cidx)
+}
+
+
+.as.matrix <-
+    function(x, ..., withDimnames=TRUE)
+{
+      val_and_idx <- .getValuesAndIndex(x=x, sparse=FALSE, ...,
+                                        withDimnames=withDimnames)
+      values <- val_and_idx[["values"]]
+      ridx <- val_and_idx[["ridx"]]
+      cidx <- val_and_idx[["cidx"]]
+
+      ## formulate result as matrix
+      m <- matrix(
         0L, nrow(x), ncol(x),
         dimnames = if (withDimnames) dimnames(x) else list(NULL, NULL)
-    )
-    m[cbind(ridx, cidx)] <- values
+      )
+      m[cbind(ridx, cidx)] <- values
+}
 
-    m
+.as.CsparseMatrix <-
+  function(x, ..., withDimnames=TRUE)
+{
+    # TODO: Support withDimnames
+    stopifnot(withDimnames)
+    val_and_idx <- .getValuesAndIndex(x, ..., withDimnames = withDimnames)
+    values <- val_and_idx[["values"]]
+    i <- val_and_idx[["i"]]
+    p <- val_and_idx[["p"]]
+    sparseMatrix(i = i,
+                 p = p,
+                 x = values,
+                 dims = dim(x),
+                 dimnames = dimnames(x),
+                 giveCsparse = TRUE)
 }
 
 #' @rdname TENxGenomics-class
@@ -253,6 +293,13 @@ as.matrix.TENxGenomics <- .as.matrix
 #'
 #' @exportMethod coerce
 setAs("TENxGenomics", "matrix", function(from) .as.matrix(from))
+
+#' @rdname TENxGenomics-class
+#'
+#' @name coerce,TENxGenomics,CsparseMatrix-method
+#'
+#' @exportMethod coerce
+setAs("TENxGenomics", "CsparseMatrix", function(from) .as.CsparseMatrix(from))
 
 ##
 ## show
