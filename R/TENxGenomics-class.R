@@ -1,5 +1,6 @@
 #' @import methods
 #' @import rhdf5
+#' @import Matrix
 
 .TENxGenomics <- setClass(
     "TENxGenomics",
@@ -161,7 +162,7 @@ setMethod("dimnames", "TENxGenomics",
 #' @param drop logical(1) TRUE only.
 #'
 #' @param ... Additional arguments, ignored.
-#' 
+#'
 #' @exportMethod [
 setMethod("[", c("TENxGenomics", "ANY", "ANY"),
     function(x, i, j, ..., drop = TRUE)
@@ -174,85 +175,6 @@ setMethod("[", c("TENxGenomics", "ANY", "ANY"),
 
     initialize(x, rowidx = .rowidx(x)[i], colidx = .colidx(x)[j])
 })
-
-##
-## coerce
-##
-
-.as.matrix <-
-    function(x, ..., withDimnames=TRUE)
-{
-    stopifnot(
-        is.logical(withDimnames), length(withDimnames) == 1L,
-        !is.na(withDimnames)
-    )
-
-    h5f <- H5Fopen(.h5path(x))
-    on.exit(H5Fclose(h5f))
-
-    ## maximum index; needed when selecting last individual
-    h5indptr <- H5Dopen(h5f, "/mm10/indptr")
-    on.exit(H5Dclose(h5indptr), add=TRUE)
-    indlen <- H5Sget_simple_extent_dims(H5Dget_space(h5indptr))$size
-
-    ## get all rows for selected columns
-    cidx <- .colidx(x)
-    startidx <- h5read(
-        h5f, "/mm10/indptr", list(cidx), bit64conversion = "double"
-    )
-
-    endidx <- h5read(                   # indptr contains the last index, too
-        h5f, "/mm10/indptr", list(cidx + 1L),
-        bit64conversion = "double"
-    ) - 1L
-
-    idx <- Map(seq, startidx, endidx, MoreArgs=list(by = 1))
-    lens <- lengths(idx)
-    idx <- unlist(idx) + 1L
-    ridx <- h5read(
-        h5f, "/mm10/indices", list(idx), bit64conversion = "double"
-    ) + 1L
-
-    ## get values for rows of interest
-    keep <- ridx %in% .rowidx(x)
-    idx <- idx[keep]
-    values <- h5read(h5f, "/mm10/data", index=list(idx))
-    cidx <- rep(seq_along(cidx), lens)[keep]
-    ridx <- match(ridx, .rowidx(x))[keep]
-
-    ## formulate result as matrix
-    m <- matrix(
-        0L, nrow(x), ncol(x),
-        dimnames = if (withDimnames) dimnames(x) else list(NULL, NULL)
-    )
-    m[cbind(ridx, cidx)] <- values
-
-    m
-}
-
-#' @rdname TENxGenomics-class
-#'
-#' @aliases as.matrix.TENxGenomics
-#'
-#' @param withDimnames logical(1) Include dimnames on returned matrix?
-#'
-#' @return \code{as.matrix(tenx)} and \code{as(tenx, "matrix")} return
-#'     a matrix with dim and dimnames equal to \code{tenx}, and values
-#'     the read counts overlapping corresponding genes and
-#'     samples. Use \code{as.matrix(withDimnames=FALSE)} to suppress
-#'     dimnames on the returned matrix. NOTE: consider the size of the
-#'     matrix, \code{prod(as.numeric(dim(tenx)))} before invoking this
-#'     function.  #' @export
-#'
-#' @export
-as.matrix.TENxGenomics <- .as.matrix
-
-#' @rdname TENxGenomics-class
-#'
-#' @name coerce,TENxGenomics,matrix-method
-#'
-#' @exportMethod coerce
-setAs("TENxGenomics", "matrix", function(from) .as.matrix(from))
 
 ##
 ## show
