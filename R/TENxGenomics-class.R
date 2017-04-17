@@ -167,8 +167,6 @@ setMethod("dimnames", "TENxGenomics",
 setMethod("[", c("TENxGenomics", "ANY", "ANY"),
     function(x, i, j, ..., drop = TRUE)
 {
-    stopifnot(identical(drop, TRUE))
-
     i <- .subset_as_integer(x, .rowname(x), .rowidx(x), i)
     j <- .subset_as_integer(x, .colname(x), .colidx(x), j)
     stopifnot(all(i %in% .rowidx(x)), all(j %in% .colidx(x)))
