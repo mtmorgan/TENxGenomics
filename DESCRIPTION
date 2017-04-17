@@ -1,6 +1,6 @@
 Package: TENxGenomics
 Title: Interface to 10x Genomics data
-Version: 0.0.9
+Version: 0.0.10
 Authors@R:
     person(
         "Martin", "Morgan", email = "Martin.Morgan@RoswellPark.org",
