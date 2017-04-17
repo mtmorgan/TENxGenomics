@@ -40,7 +40,7 @@
     ## get values for rows of interest
     keep <- ridx %in% .rowidx(x)
     idx <- idx[keep]
-    values <- h5read(h5f, "/mm10/data", index=list(idx))
+    values <-as.vector(h5read(h5f, "/mm10/data", index=list(idx)))
     ridx <- match(ridx, .rowidx(x))[keep]
     cidx <- rep(seq_along(cidx), lens)[keep]
 
@@ -59,7 +59,22 @@
     }
 }
 
-.as.matrix <-
+#' @rdname TENxGenomics-class
+#'
+#' @param withDimnames logical(1) Include dimnames on returned matrix?
+#'
+#' @return \code{as.matrix(tenx)} and \code{as(tenx, "matrix")} return
+#'     a matrix with dim and dimnames equal to \code{tenx}, and values
+#'     the read counts overlapping corresponding genes and
+#'     samples. Use \code{as.matrix(withDimnames=FALSE)} to suppress
+#'     dimnames on the returned matrix. NOTE: consider the size of the
+#'     matrix, \code{prod(as.numeric(dim(tenx)))} before invoking this
+#'     function.
+#'
+#' @method as.matrix TENxGenomics
+#'
+#' @export
+as.matrix.TENxGenomics <-
     function(x, ..., withDimnames=TRUE)
 {
     values_and_indices <- .values_and_indices(
@@ -78,7 +93,24 @@
     m
 }
 
-.as.dgCMatrix <-
+#' @rdname TENxGenomics-class
+#'
+#' @name coerce,TENxGenomics,matrix-method
+#'
+#' @exportMethod coerce
+setAs("TENxGenomics", "matrix", function(from) as.matrix.TENxGenomics(from))
+
+#' @rdname TENxGenomics-class
+#'
+#' @return \code{as.dgCMatrix(tenx)} and \code{as(tenx, "dgCMatrix")}
+#'     return a sparse matrix (from the Matrix package) with dim and
+#'     dimnames equal to \code{tenx}, and values the read counts
+#'     overlapping corresponding genes and samples. Use
+#'     \code{as.matrix(withDimnames=FALSE)} to suppress dimnames on
+#'     the returned matrix.
+#'
+#' @export
+as.dgCMatrix <-
     function(x, ..., withDimnames=TRUE)
 {
     # TODO: Support withDimnames
@@ -96,28 +128,6 @@
     )
 }
 
-#' @rdname TENxGenomics-class
-#'
-#' @param withDimnames logical(1) Include dimnames on returned matrix?
-#'
-#' @return \code{as.matrix(tenx)} and \code{as(tenx, "matrix")} return
-#'     a matrix with dim and dimnames equal to \code{tenx}, and values
-#'     the read counts overlapping corresponding genes and
-#'     samples. Use \code{as.matrix(withDimnames=FALSE)} to suppress
-#'     dimnames on the returned matrix. NOTE: consider the size of the
-#'     matrix, \code{prod(as.numeric(dim(tenx)))} before invoking this
-#'     function.  #' @export
-#'
-#' @export
-as.matrix.TENxGenomics <- .as.matrix
-
-#' @rdname TENxGenomics-class
-#'
-#' @name coerce,TENxGenomics,matrix-method
-#'
-#' @exportMethod coerce
-setAs("TENxGenomics", "matrix", function(from) .as.matrix(from))
-
 ## NOTE: This uses a dgCMatrix, a compressed, sparse, column-oriented
 ##     numeric (double) matrix. What we really want to use to store
 ##     these data is a igCMatrix, a compressed, sparse,
@@ -130,4 +140,4 @@ setAs("TENxGenomics", "matrix", function(from) .as.matrix(from))
 #' @name coerce,TENxGenomics,dgCMatrix-method
 #'
 #' @exportMethod coerce
-setAs("TENxGenomics", "dgCMatrix", function(from) .as.dgCMatrix(from))
+setAs("TENxGenomics", "dgCMatrix", function(from) as.dgCMatrix(from))

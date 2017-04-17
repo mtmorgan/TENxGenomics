@@ -10,6 +10,7 @@
 \alias{show,TENxGenomics-method}
 \alias{as.matrix.TENxGenomics}
 \alias{coerce,TENxGenomics,matrix-method}
+\alias{as.dgCMatrix}
 \alias{coerce,TENxGenomics,dgCMatrix-method}
 \title{Create and manipulate a reference to 10xGenomics data.}
 \usage{
@@ -23,9 +24,9 @@ TENxGenomics(h5path)
 
 \S4method{show}{TENxGenomics}(object)
 
-as.matrix.TENxGenomics(x, ..., withDimnames = TRUE)
+\method{as.matrix}{TENxGenomics}(x, ..., withDimnames = TRUE)
 
-as(from, "dgCMatrix")
+as.dgCMatrix(x, ..., withDimnames = TRUE)
 }
 \arguments{
 \item{h5path}{character(1) file path to the
@@ -57,7 +58,14 @@ columns of \code{x}.}
     samples. Use \code{as.matrix(withDimnames=FALSE)} to suppress
     dimnames on the returned matrix. NOTE: consider the size of the
     matrix, \code{prod(as.numeric(dim(tenx)))} before invoking this
-    function.  #' @export
+    function.
+
+\code{as.dgCMatrix(tenx)} and \code{as(tenx, "dgCMatrix")}
+    return a sparse matrix (from the Matrix package) with dim and
+    dimnames equal to \code{tenx}, and values the read counts
+    overlapping corresponding genes and samples. Use
+    \code{as.matrix(withDimnames=FALSE)} to suppress dimnames on
+    the returned matrix.
 }
 \description{
 The TENxGenomics class provides a simple interface to
