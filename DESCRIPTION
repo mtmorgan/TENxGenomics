@@ -1,6 +1,6 @@
 Package: TENxGenomics
 Title: Interface to 10x Genomics data
-Version: 0.0.10
+Version: 0.0.11
 Authors@R:
     person(
         "Martin", "Morgan", email = "Martin.Morgan@RoswellPark.org",
@@ -20,4 +20,4 @@ Collate:
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
