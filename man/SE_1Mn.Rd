@@ -12,9 +12,6 @@ SE_1Mn(samps = 1:100,
 
 \item{h5fname}{path to hdf5 for the 10x genomics data as distributed}
 }
-\description{
-creates dense SummarizedExperiment with the 1Mneuron data
-}
 \author{
 VJ Carey
 }

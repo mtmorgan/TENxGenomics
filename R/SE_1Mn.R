@@ -1,4 +1,5 @@
-#' creates dense SummarizedExperiment with the 1Mneuron data
+#' @import SummarizedExperiment
+#' @title creates dense SummarizedExperiment with the 1Mneuron data
 #' @param samps a vector of sample indices to use (might be able to use barcodes)
 #' @param h5fname path to hdf5 for the 10x genomics data as distributed
 #' @author VJ Carey 

@@ -17,6 +17,7 @@ Collate:
     TENxGenomics-class.R
     coerce.R
     tenxreduce.R
+    SE_1Mn.R
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
