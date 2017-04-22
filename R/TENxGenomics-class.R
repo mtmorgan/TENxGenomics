@@ -11,11 +11,13 @@
         ## internal
         dataname = "character",
         rowname = "character",
+        genenames = "character",
         colname = "character"
     ),
     prototype = prototype(
         dataname = "/mm10/data",
         rowname = "/mm10/genes",
+        genenames = "/mm10/gene_names",
         colname = "/mm10/barcodes"
     )
 )
@@ -29,6 +31,8 @@
 .dataname <- function(x) x@dataname
 
 .rowname <- function(x) x@rowname
+
+.genenames <- function(x) x@genenames
 
 .colname <- function(x) x@colname
 

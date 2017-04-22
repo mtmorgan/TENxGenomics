@@ -3,6 +3,7 @@
 S3method(as.matrix,TENxGenomics)
 export(TENxGenomics)
 export(as.dgCMatrix)
+export(tenxSummarizedExperiment)
 export(tenxreduce)
 exportMethods("[")
 exportMethods(coerce)

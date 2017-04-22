@@ -1,6 +1,6 @@
 Package: TENxGenomics
 Title: Interface to 10x Genomics data
-Version: 0.0.10
+Version: 0.0.11
 Authors@R:
     person(
         "Martin", "Morgan", email = "Martin.Morgan@RoswellPark.org",
@@ -13,9 +13,11 @@ Description: This package provides an interface to 10x Genomics data,
     slices (rows, columns).
 Depends: R (>= 3.4.0), methods, Matrix
 Imports: rhdf5 (>= 2.19.3-2)
+Suggests: S4Vectors, SummarizedExperiment
 Collate:
     TENxGenomics-class.R
     coerce.R
+    tenxSummarizedExperiment.R
     tenxreduce.R
 License: Artistic-2.0
 Encoding: UTF-8
