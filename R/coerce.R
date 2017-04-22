@@ -4,7 +4,7 @@
 
 # Helper for common logic underlying .as.matrix() and .as.sparseMatrix()
 .values_and_indices <-
-    function(x, sparse = FALSE, ..., withDimnames=TRUE)
+    function(x, ..., withDimnames=TRUE)
 {
     stopifnot(
         is.logical(withDimnames), length(withDimnames) == 1L,
@@ -43,20 +43,7 @@
     values <-as.vector(h5read(h5f, "/mm10/data", index=list(idx)))
     ridx <- match(ridx, .rowidx(x))[keep]
     cidx <- rep(seq_along(cidx), lens)[keep]
-
-    if (sparse) {
-        ## It is more (memory) efficient to supply i and p, rather
-        ## than i and j, to Matrix::sparseMatrix():
-        ##
-        ## i = ridx: length(i) == length(values)
-        ## j = cidx: length(j) == length(values)
-        ## p = c(startidx, endidx[length(endidx)] + 1L):
-        ##     length(p) == (ncol(x) + 1)
-        p <- c(0, cumsum(tabulate(cidx)))
-        list(values = values, i = ridx, p = p)
-    } else {
-        list(values = values, ridx = ridx, cidx = cidx)
-    }
+    list(values = values, ridx = ridx, cidx = cidx)
 }
 
 #' @rdname TENxGenomics-class
@@ -78,7 +65,7 @@ as.matrix.TENxGenomics <-
     function(x, ..., withDimnames=TRUE)
 {
     values_and_indices <- .values_and_indices(
-        x=x, sparse=FALSE, ..., withDimnames=withDimnames
+        x=x, ..., withDimnames=withDimnames
     )
     values <- values_and_indices[["values"]]
     ridx <- values_and_indices[["ridx"]]
@@ -116,12 +103,12 @@ as.dgCMatrix <-
     # TODO: Support withDimnames
     stopifnot(withDimnames)
     values_and_indices <- .values_and_indices(
-        x, sparse = TRUE, ..., withDimnames = withDimnames
+        x, ..., withDimnames = withDimnames
     )
 
     sparseMatrix(
-        i = values_and_indices[["i"]],
-        p = values_and_indices[["p"]],
+        i = values_and_indices[["ridx"]],
+        j = values_and_indices[["cidx"]],
         x = values_and_indices[["values"]],
         dims = dim(x), dimnames = dimnames(x),
         giveCsparse = TRUE
