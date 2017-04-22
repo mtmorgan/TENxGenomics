@@ -12,7 +12,7 @@ Description: This package provides an interface to 10x Genomics data,
     allowing access to subsets that easily fit in R memory as dense
     slices (rows, columns).
 Depends: R (>= 3.4.0), methods, Matrix
-Imports: rhdf5 (== 2.19.3-2)
+Imports: rhdf5 (>= 2.19.3-2)
 Collate:
     TENxGenomics-class.R
     coerce.R
