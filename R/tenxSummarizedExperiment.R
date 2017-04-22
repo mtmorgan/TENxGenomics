@@ -1,9 +1,43 @@
-.rowData <-
-    function(x)
+.requireSummarizedExperiment <-
+    function()
 {
+    requireNamespace("S4Vectors", quietly=TRUE)
+    requireNamespace("SummarizedExperiment", quietly=TRUE)
+    if (!"SummarizedExperiment" %in% sub("package:", "", search()))
+        message("use 'library(\"SummarizedExperiment\")' to access this object")
+}
+
+.requireMatrix <-
+    function()
+{
+    requireNamespace("Matrix")
+    if (!"Matrix" %in% sub("package:", "", search()))
+        message("use 'library(\"Matrix\")' to access this object")
+}
+
+.tenxGenomics <-
+    function(h5path, i, j)
+{
+    if (missing(i) && missing(j)) {
+        TENxGenomics(h5path)
+    } else if (missing(i)) {
+        TENxGenomics(h5path)[, j]
+    } else if (missing(j)) {
+        TENxGenomics(h5path)[i, ]
+    } else {
+        TENxGenomics(h5path)[i, j]
+    }
+}
+
+.rowData <-
+    function(x, rowData)
+{
+    if (!missing(rowData))
+        return(S4Vectors::DataFrame(rowData))
+
     S4Vectors::DataFrame(
         Ensembl = rownames(x),
-        Symbol = h5read(.h5path(x), .genenames(x))
+        Symbol = h5read(.h5path(x), .genenames(x), list(.rowidx(x)))
     )
 }
 
@@ -23,13 +57,28 @@
 }
 
 .colData <-
-    function(x)
+    function(x, colData)
 {
-    if (startsWith(basename(.h5path(x)), "1M_neurons_")) {
+    if (!missing(colData))
+        S4Vectors::DataFrame(colData)
+    else if (startsWith(basename(.h5path(x)), "1M_neurons_")) {
         .colData_1M_neurons(x)
     } else {
         S4Vectors::DataFrame(i=seq_len(ncol(x)))[, FALSE]
     }
+}
+
+.as.SummarizedExperiment <-
+    function(tenx, rowData, colData, how)
+{
+    .requireSummarizedExperiment()
+
+    rowData <- .rowData(tenx, rowData)
+    colData <- .colData(tenx, colData)
+
+    SummarizedExperiment::SummarizedExperiment(
+        assays = list(how(tenx)), rowData = rowData, colData = colData
+    )
 }
 
 #' @rdname tenxSummarizedExperiment
@@ -46,38 +95,103 @@
 #'
 #' @param h5path character(1) file path to a 1M_neurons_*.h5 file.
 #'
-#' @param rowData A \code{DataFrame()} with as many rows as there are
-#'     genes in the 10xGenomics file. If missing, an object is created
-#'     with 'gene' and 'genename' fields from the hdf5 file.
+#' @param x A \code{TENxGenomics-class} instance.
 #'
-#' @param colData A \code{DataFrame()} with as many rows as there are
-#'     samples in the 10xGenomics file. If missing, and object is
-#'     constructed from the barcodes of the hdf5 file. The sequence
-#'     and library portions are separated, and the mouse is inferred
-#'     (libraries <= 69 are from mouse "A", others are from mouse
-#'     "B").
+#' @param i Optional integer(), character(), or logical() index used to subset
+#'     rows (genes) of the \code{TENxGenomics} object.
 #'
-#' @return A \code{SummarizedExperiment} object. For effective use of
-#'     the return object, load the SummarizedExperiment library into
-#'     the R session.
-#' 
+#' @param j Optional integer(), character(), or logical() index used to subset
+#'     columns (samples) of the \code{TENxGenomics} object.
+#'
+#' @param rowData Optional \code{DataFrame()} with as many rows as
+#'     there are genes in the 10xGenomics file or object. If missing,
+#'     an object is created with 'gene' and 'genename' fields from the
+#'     hdf5 file.
+#'
+#' @param colData Optional \code{DataFrame()} with as many rows as
+#'     there are samples in the 10xGenomics file or object. If
+#'     missing, and object is constructed from the barcodes of the
+#'     hdf5 file. The sequence and library portions are separated, and
+#'     the mouse is inferred (libraries <= 69 are from mouse "A",
+#'     others are from mouse "B").
+#'
+#' @return \code{tenxSummarizedExperiment()} and
+#'     \code{as.tenxSummarizedExperiment()} return a
+#'     \code{SummarizedExperiment} instance where the assay() data are
+#'     represented as a \code{TENxGenomics} object. Down-stream
+#'     analysis will typically extract this object from (a subset of)
+#'     the SummarizedExperiment, and coerce it to a, e.g,. matrix,
+#'     \code{as.matrix(assay(se[, 1:100]))}.
+#'
 #' @export
 tenxSummarizedExperiment <-
-    function(h5path, rowData, colData)
+    function(h5path, i, j, rowData, colData)
 {
-    requireNamespace("S4Vectors", quietly=TRUE)
-    requireNamespace("SummarizedExperiment", quietly=TRUE)
-    if (!"SummarizedExperiment" %in% sub("package:", "", search()))
-        message("use 'library(\"SummarizedExperiment\")' to access this object")
+    tenx <- .tenxGenomics(h5path, i, j)
+    as.tenxSummarizedExperiment(tenx, rowData, colData)
+}
 
-    tenx <- TENxGenomics(h5path)
+#' @rdname tenxSummarizedExperiment
+#'
+#' @export
+as.tenxSummarizedExperiment <-
+    function(x, rowData, colData)
+{
+    stopifnot(is(x, "TENxGenomics"))
+    .as.SummarizedExperiment(x, rowData, colData, identity)
+}
 
-    if (missing(rowData))
-        rowData <- .rowData(tenx)
-    if (missing(colData))
-        colData <- .colData(tenx)
+#' @rdname tenxSummarizedExperiment
+#'
+#' @return \code{matrixSummarizedExperiment()} and
+#'     \code{as.matrixSummarizedExperiment()} return a
+#'     \code{SummarizedExperiment} instance where the assay() data are
+#'     represented as a \code{Matrix::dgCMatrix} object. There are
+#'     practical limits to the size of this object (e.g., 20k
+#'     samples); the code is most efficient when consecutive samples
+#'     are selected.
+#'
+#' @export
+matrixSummarizedExperiment <-
+    function(h5path, i, j, rowData, colData)
+{
+    .requireSummarizedExperiment()
 
-    SummarizedExperiment::SummarizedExperiment(
-        assays = list(tenx), rowData = rowData, colData = colData
-    )
+    tenx <- .tenxGenomics(h5path, i, j)
+    as.matrixSummarizedExperiment(tenx, rowData, colData)
+}
+
+#' @rdname tenxSummarizedExperiment
+#'
+#' @export
+as.matrixSummarizedExperiment <-
+    function(x, rowData, colData)
+{
+    stopifnot(is(x, "TENxGenomics"))
+    .as.SummarizedExperiment(x, rowData, colData, as.matrix)
+}
+
+#' @rdname tenxSummarizedExperiment
+#'
+#' @return \code{dgCMatrixSummarizedExperiment()} and
+#'     \code{as.dgCMatrixSummarizedExperiment()} return a
+#'     \code{SummarizedExperiment} instance where the assay() data are
+#'     represented as a \code{Matrix::dgCMatrix} object. There are
+#'     practical limits to the size of this object; the code is most
+#'     efficient when consecutive samples are selected.
+#' @export
+dgCMatrixSummarizedExperiment <-
+    function(h5path, i, j, rowData, colData)
+{
+    tenx <- .tenxGenomics(h5path, i, j)
+    as.dgCMatrixSummarizedExperiment(tenx, rowData, colData)
+}
+
+#' @rdname tenxSummarizedExperiment
+#'
+#' @export
+as.dgCMatrixSummarizedExperiment <-
+    function(x, rowData, colData)
+{
+    .as.SummarizedExperiment(x, rowData, colData, as.dgCMatrix)
 }

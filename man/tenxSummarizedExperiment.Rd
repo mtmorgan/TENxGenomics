@@ -2,28 +2,71 @@
 % Please edit documentation in R/tenxSummarizedExperiment.R
 \name{tenxSummarizedExperiment}
 \alias{tenxSummarizedExperiment}
+\alias{as.tenxSummarizedExperiment}
+\alias{matrixSummarizedExperiment}
+\alias{as.matrixSummarizedExperiment}
+\alias{dgCMatrixSummarizedExperiment}
+\alias{as.dgCMatrixSummarizedExperiment}
 \title{Create a 'SummarizedExperiment' from an 10xGenomics hdf5 file.}
 \usage{
-tenxSummarizedExperiment(h5path, rowData, colData)
+tenxSummarizedExperiment(h5path, i, j, rowData, colData)
+
+as.tenxSummarizedExperiment(x, rowData, colData)
+
+matrixSummarizedExperiment(h5path, i, j, rowData, colData)
+
+as.matrixSummarizedExperiment(x, rowData, colData)
+
+dgCMatrixSummarizedExperiment(h5path, i, j, rowData, colData)
+
+as.dgCMatrixSummarizedExperiment(x, rowData, colData)
 }
 \arguments{
 \item{h5path}{character(1) file path to a 1M_neurons_*.h5 file.}
 
-\item{rowData}{A \code{DataFrame()} with as many rows as there are
-genes in the 10xGenomics file. If missing, an object is created
-with 'gene' and 'genename' fields from the hdf5 file.}
+\item{i}{Optional integer(), character(), or logical() index used to subset
+rows (genes) of the \code{TENxGenomics} object.}
 
-\item{colData}{A \code{DataFrame()} with as many rows as there are
-samples in the 10xGenomics file. If missing, and object is
-constructed from the barcodes of the hdf5 file. The sequence
-and library portions are separated, and the mouse is inferred
-(libraries <= 69 are from mouse "A", others are from mouse
-"B").}
+\item{j}{Optional integer(), character(), or logical() index used to subset
+columns (samples) of the \code{TENxGenomics} object.}
+
+\item{rowData}{Optional \code{DataFrame()} with as many rows as
+there are genes in the 10xGenomics file or object. If missing,
+an object is created with 'gene' and 'genename' fields from the
+hdf5 file.}
+
+\item{colData}{Optional \code{DataFrame()} with as many rows as
+there are samples in the 10xGenomics file or object. If
+missing, and object is constructed from the barcodes of the
+hdf5 file. The sequence and library portions are separated, and
+the mouse is inferred (libraries <= 69 are from mouse "A",
+others are from mouse "B").}
+
+\item{x}{A \code{TENxGenomics-class} instance.}
 }
 \value{
-A \code{SummarizedExperiment} object. For effective use of
-    the return object, load the SummarizedExperiment library into
-    the R session.
+\code{tenxSummarizedExperiment()} and
+    \code{as.tenxSummarizedExperiment()} return a
+    \code{SummarizedExperiment} instance where the assay() data are
+    represented as a \code{TENxGenomics} object. Down-stream
+    analysis will typically extract this object from (a subset of)
+    the SummarizedExperiment, and coerce it to a, e.g,. matrix,
+    \code{as.matrix(assay(se[, 1:100]))}.
+
+\code{matrixSummarizedExperiment()} and
+    \code{as.matrixSummarizedExperiment()} return a
+    \code{SummarizedExperiment} instance where the assay() data are
+    represented as a \code{Matrix::dgCMatrix} object. There are
+    practical limits to the size of this object (e.g., 20k
+    samples); the code is most efficient when consecutive samples
+    are selected.
+
+\code{dgCMatrixSummarizedExperiment()} and
+    \code{as.dgCMatrixSummarizedExperiment()} return a
+    \code{SummarizedExperiment} instance where the assay() data are
+    represented as a \code{Matrix::dgCMatrix} object. There are
+    practical limits to the size of this object; the code is most
+    efficient when consecutive samples are selected.
 }
 \description{
 The SummarizedExperiment \code{assay()} contains the

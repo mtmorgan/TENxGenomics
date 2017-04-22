@@ -1,6 +1,5 @@
 #' @import methods
 #' @import rhdf5
-#' @import Matrix
 
 .TENxGenomics <- setClass(
     "TENxGenomics",
@@ -152,7 +151,7 @@ setMethod("dimnames", "TENxGenomics",
 
 #' @rdname TENxGenomics-class
 #'
-#' @aliases [,TENxGenomics,ANY,ANY-method
+#' @aliases [,TENxGenomics,ANY,ANY-method [,TENxGenomics-method
 #'
 #' @param x A \code{TENxGenomics-class} instance.
 #'

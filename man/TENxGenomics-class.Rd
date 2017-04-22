@@ -7,6 +7,7 @@
 \alias{dimnames,TENxGenomics-method}
 \alias{[,TENxGenomics,ANY,ANY,ANY-method}
 \alias{[,TENxGenomics,ANY,ANY-method}
+\alias{[,TENxGenomics-method}
 \alias{show,TENxGenomics-method}
 \alias{as.matrix.TENxGenomics}
 \alias{coerce,TENxGenomics,matrix-method}
