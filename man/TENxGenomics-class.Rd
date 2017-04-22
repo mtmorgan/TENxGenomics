@@ -29,8 +29,7 @@ TENxGenomics(h5path)
 as.dgCMatrix(x, ..., withDimnames = TRUE)
 }
 \arguments{
-\item{h5path}{character(1) file path to the
-1M_neurons_filtered_gene_bc_matrices_h5.h5 file.}
+\item{h5path}{character(1) file path to a 1M_neurons_*.h5 file.}
 
 \item{x}{A \code{TENxGenomics-class} instance.}
 

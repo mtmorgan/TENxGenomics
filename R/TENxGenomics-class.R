@@ -51,8 +51,7 @@
 #'     a light-weight operation; input (typically of the subset
 #'     matrix) is as a dense matrix and hence consumes memory.
 #'
-#' @param h5path character(1) file path to the
-#'     1M_neurons_filtered_gene_bc_matrices_h5.h5 file.
+#' @param h5path character(1) file path to a 1M_neurons_*.h5 file.
 #'
 #' @return \code{TENxGenomics()} returns a \code{TENxGenomics-class}
 #'     instance.

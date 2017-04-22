@@ -1,6 +1,6 @@
 #' @rdname tenxreduce
 #'
-#' @title Visit and 'reduce()' all values in the hdf5 file.
+#' @title Visit and 'reduce()' all values in a 10xGenomics hdf5 file.
 #'
 #' @description This function visits all records in the hdf5 file,
 #'     passing a list of value, row index, and column index to a

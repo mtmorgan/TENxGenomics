@@ -2,7 +2,7 @@
 % Please edit documentation in R/tenxreduce.R
 \name{tenxreduce}
 \alias{tenxreduce}
-\title{Visit and 'reduce()' all values in the hdf5 file.}
+\title{Visit and 'reduce()' all values in a 10xGenomics hdf5 file.}
 \usage{
 tenxreduce(X, FUN, ..., verbose = interactive(), BLOCK = 1e+08)
 }
