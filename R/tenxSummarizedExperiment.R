@@ -61,10 +61,16 @@
 {
     if (!missing(colData))
         S4Vectors::DataFrame(colData)
-    else if (startsWith(basename(.h5path(x)), "1M_neurons_")) {
-        .colData_1M_neurons(x)
-    } else {
-        S4Vectors::DataFrame(i=seq_len(ncol(x)))[, FALSE]
+    else {
+        tryCatch({
+            .colData_1M_neurons(x)
+         }, error = function(e) {
+             warning(
+                 "failed to create colData:",
+                 "\n  ", conditionMessage(e)
+             )
+             S4Vectors::DataFrame(i=seq_len(ncol(x)))[, FALSE]
+        })
     }
 }
 
