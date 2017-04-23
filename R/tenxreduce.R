@@ -22,14 +22,14 @@
 #'
 #' @param verbose logical(1) when TRUE, print a progress bar.
 #'
-#' @param BLOCK numeric(1) Number of values to process during each
+#' @param BLOCK numeric(1) Number of columns to process during each
 #'     iteration.
 #'
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #'
 #' @export
 tenxreduce <-
-    function(X, FUN, ..., verbose = interactive(), BLOCK = 100000000)
+    function(X, FUN, ..., verbose = interactive(), BLOCK = 10000)
 {
     stopifnot(
         is(X, "TENxGenomics"),
@@ -41,11 +41,11 @@ tenxreduce <-
     h5f <- H5Fopen(.h5path(X))
     on.exit(H5Fclose(h5f))
 
-    h5data <- H5Dopen(h5f, "/mm10/data")
+    h5data <- H5Dopen(h5f, .dataname(X))
     datalen <- H5Sget_simple_extent_dims(H5Dget_space(h5data))$size
     H5Dclose(h5data)
 
-    indptr <- h5read(h5f, "/mm10/indptr", bit64conversion = "double") + 1
+    indptr <- h5read(h5f, .indptr(X), bit64conversion = "double") + 1
 
     ## initialize
     result <- NULL
@@ -66,10 +66,10 @@ tenxreduce <-
             break
 
         value <- h5read(
-            h5f, "/mm10/data", start =start, block = block, count = 1L
+            h5f, .dataname(X), start =start, block = block, count = 1L
         )
         ridx <- h5read(
-            h5f, "/mm10/indices", start =start, block = block, count = 1L
+            h5f, .indices(X), start =start, block = block, count = 1L
         ) + 1
         cidx <- findInterval(seq(start, start + block - 1), indptr)
         keep <- (ridx %in% .rowidx(X)) & (cidx %in% .colidx(X))

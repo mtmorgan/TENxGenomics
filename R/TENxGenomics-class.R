@@ -11,13 +11,17 @@
         dataname = "character",
         rowname = "character",
         genenames = "character",
-        colname = "character"
+        colname = "character",
+        indices = "character",
+        indptr = "character"
     ),
     prototype = prototype(
         dataname = "/mm10/data",
         rowname = "/mm10/genes",
         genenames = "/mm10/gene_names",
-        colname = "/mm10/barcodes"
+        colname = "/mm10/barcodes",
+        indices = "/mm10/indices",
+        indptr = "/mm10/indptr"
     )
 )
 
@@ -34,6 +38,10 @@
 .genenames <- function(x) x@genenames
 
 .colname <- function(x) x@colname
+
+.indptr <- function(x) x@indptr
+
+.indices <- function(x) x@indices
 
 .h5_dimidx <-
     function(h5f, name)
