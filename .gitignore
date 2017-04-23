@@ -1,0 +1,7 @@
+.Rhistory
+.Rbuildignore
+*.R
+*.html
+*.h5
+*_cache
+*_files
