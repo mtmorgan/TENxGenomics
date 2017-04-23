@@ -8,7 +8,7 @@ vignette: >
   %\VignetteIndexEntry{Accessing TENxGenomics data in R / Bioconductor}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-output: 
+output:
   BiocStyle::html_document2
 ---
 
@@ -27,7 +27,8 @@ suppressPackageStartupMessages({
 
 # Setup
 
-This vignette requires the [TENxGenomics][] package, available from github
+This vignette requires the [TENxGenomics][] package, available from
+github.
 
 ```{r setup1, eval=FALSE}
 biocLite("mtmorgan/TENxGenomics")
@@ -56,7 +57,7 @@ if (!file.exists(path)) {
 # Discovery and subsetting
 
 The 10x data are 'hdf5' format files. Discover basic information about
-the dataset using the `TENxGenomics()` contructor.
+the data set using the `TENxGenomics()` constructor.
 
 ```{r}
 tenx <- TENxGenomics(path)
@@ -64,10 +65,11 @@ tenx
 ```
 
 The returned object is a light-weight 'view' into the file. The view
-has matrix-like semantics, with methods `dims()` (implicitly,
+has matrix-like semantics, with methods `dim()` (implicitly,
 `nrow()`, `ncol()`), `dimnames()` (`rownames()` and `colnames()`), and
-`[` can be used to easily subset the very large data to a more useful
-size. Subsetting supports numeric, character, and logical vectors.
+`[`. The latter is useful to easily subset the very large data to a more
+useful size. Subsetting supports numeric, character, and logical
+vectors.
 
 ```{r}
 tenx[, sample(ncol(tenx), 1000)]
@@ -78,9 +80,9 @@ colnames(tenx[, sample(ncol(tenx), 3)])
 
 A useful strategy when working with large data is to input portions of
 the data. This allows, for instance, management of overall memory use
-when exploiting multiple compuational cores. On typical computers it
+when exploiting multiple computational cores. On typical computers it
 might be reasonable to input on the order of 10k samples at a
-time. 
+time.
 
 ## Simple
 
@@ -94,7 +96,7 @@ dim(onek)
 onek[1:10, 1:5]
 ```
 
-Input is quickest when the colums are sequential, but one can also
+Input is quickest when the columns are sequential, but one can also
 input random rows and columns. This is reasonably quick for samples up
 to about 1k.
 
@@ -166,13 +168,19 @@ plot(M ~ A)
 abline(0, 0, lwd=2, col="blue")
 ```
 
-Samples do not show obvious patterns with respect to mouse-of-orgin.
+Samples do not show obvious patterns with respect to mouse-of-origin.
 
 ```{r}
 library(Rtsne)
 d <- dist(t(log(1 + assay(se))), method="manhattan")
 tsne <- Rtsne(d)
 plot(tsne$Y, pch=20, col = se$Mouse, cex=2, asp=1)
+```
+
+# Session info
+
+```{r}
+sessionInfo()
 ```
 
 [TENxGenomics]: https:/github.com/mtmorgan/TENxGenomics
