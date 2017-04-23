@@ -15,18 +15,18 @@
     on.exit(H5Fclose(h5f))
 
     ## maximum index; needed when selecting last individual
-    h5indptr <- H5Dopen(h5f, "/mm10/indptr")
+    h5indptr <- H5Dopen(h5f, .indptr(x))
     on.exit(H5Dclose(h5indptr), add=TRUE)
     indlen <- H5Sget_simple_extent_dims(H5Dget_space(h5indptr))$size
 
     ## get all rows for selected columns
     cidx <- .colidx(x)
     startidx <- h5read(
-        h5f, "/mm10/indptr", list(cidx), bit64conversion = "double"
+        h5f, .indptr(x), list(cidx), bit64conversion = "double"
     )
 
     endidx <- h5read(                   # indptr contains the last index, too
-        h5f, "/mm10/indptr", list(cidx + 1L),
+        h5f, .indptr(x), list(cidx + 1L),
         bit64conversion = "double"
     ) - 1L
 
@@ -34,13 +34,13 @@
     lens <- lengths(idx)
     idx <- unlist(idx) + 1L
     ridx <- h5read(
-        h5f, "/mm10/indices", list(idx), bit64conversion = "double"
+        h5f, .indices(x), list(idx), bit64conversion = "double"
     ) + 1L
 
     ## get values for rows of interest
     keep <- ridx %in% .rowidx(x)
     idx <- idx[keep]
-    values <-as.vector(h5read(h5f, "/mm10/data", index=list(idx)))
+    values <-as.vector(h5read(h5f, .dataname(x), index=list(idx)))
     ridx <- match(ridx, .rowidx(x))[keep]
     cidx <- rep(seq_along(cidx), lens)[keep]
     list(values = values, ridx = ridx, cidx = cidx)
