@@ -9,14 +9,19 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 output: 
-  BiocStyle::html_document
+  BiocStyle::html_document2
 ---
 
 ```{r vignette_setup, echo=FALSE}
+knitr::opts_chunk$set(
+    eval=as.logical(Sys.getenv("KNITR_EVAL", "TRUE")),
+    cache=as.logical(Sys.getenv("KNITR_CACHE", "TRUE"))
+)
 suppressPackageStartupMessages({
     library(TENxGenomics)
     library(BiocFileCache)
     library(SummarizedExperiment)
+    library(Rtsne)
 })
 ```
 
@@ -130,6 +135,44 @@ library(SummarizedExperiment)
 se <- matrixSummarizedExperiment(path, j = samples)
 se
 table(se$Mouse)
+```
+
+# Exploratory analysis
+
+With a reasonable subset of data in memory, it is possible to explore
+basic properties of the data.
+
+The data is very sparse
+
+```{r}
+sum(assay(se) == 0) / prod(dim(se))
+```
+
+Here are histograms of library size and reads per gene
+
+```{r}
+hist(log10(1 + colSums(assay(se))))
+hist(log(1 + rowSums(assay(se))))
+```
+
+Pooling across cells, the 'MA' plot is reassuringly familiar and
+approximately symmetric about Y = 0.
+
+```{r}
+ma <- log(1 + rowsum(t(assay(se)), se$Mouse))
+M <- ma[1,] - ma[2,]
+A <- (ma[1,] + ma[2,]) / 2
+plot(M ~ A)
+abline(0, 0, lwd=2, col="blue")
+```
+
+Samples do not show obvious patterns with respect to mouse-of-orgin.
+
+```{r}
+library(Rtsne)
+d <- dist(t(log(1 + assay(se))), method="manhattan")
+tsne <- Rtsne(d)
+plot(tsne$Y, pch=20, col = se$Mouse, cex=2, asp=1)
 ```
 
 [TENxGenomics]: https:/github.com/mtmorgan/TENxGenomics

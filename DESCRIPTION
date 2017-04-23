@@ -6,14 +6,14 @@ Authors@R:
         "Martin", "Morgan", email = "Martin.Morgan@RoswellPark.org",
         role = c("aut", "cre")
     )
-Description: This package provides an interface to 10x Genomics data,
+Description: This package provides an interface to 10xGenomics data,
     in particular the '1.3 million single cell' dataset. Functionality
     provides easy access to the large hdf5 data representation,
-    allowing access to subsets that easily fit in R memory as dense
-    slices (rows, columns).
+    including convenient subsetting to data that easily fit in R
+    memory as dense slices (rows, columns).
 Depends: R (>= 3.4.0), methods
 Imports: rhdf5 (>= 2.19.3-2)
-Suggests: Matrix, S4Vectors, SummarizedExperiment
+Suggests: Matrix, S4Vectors, SummarizedExperiment, BiocFileCache, Rtsne
 Collate:
     TENxGenomics-class.R
     coerce.R
