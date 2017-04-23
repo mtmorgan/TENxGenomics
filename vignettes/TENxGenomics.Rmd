@@ -1,0 +1,138 @@
+---
+title: "Accessing TENxGenomics data in _R_ / _Bioconductor_"
+author: "Martin Morgan"
+date: "`r doc_date()`"
+package: "`r pkg_ver('TENxGenomics')`"
+abstract: "`r packageDescription('TENxGenomics')$Description`"
+vignette: >
+  %\VignetteIndexEntry{Accessing TENxGenomics data in R / Bioconductor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output: 
+  BiocStyle::html_document
+---
+
+```{r vignette_setup, echo=FALSE}
+suppressPackageStartupMessages({
+    library(TENxGenomics)
+    library(BiocFileCache)
+    library(SummarizedExperiment)
+})
+```
+
+# Setup
+
+This vignette requires the [TENxGenomics][] package, available from github
+
+```{r setup1, eval=FALSE}
+biocLite("mtmorgan/TENxGenomics")
+library(TENxGenomics)
+```
+
+The vignette uses large datasets made available from
+[10xGenomics][]. We store these in a convenient location using
+[BiocFileCache][].
+
+```{r bfc}
+library(BiocFileCache)
+bfc <- BiocFileCache()
+path <- bfcrpath(bfc, "1M_neurons_filtered")
+if (!file.exists(path)) {
+    url <- paste0(
+        "https://s3-us-west-2.amazonaws.com/10x.files",
+        "/samples/cell/1M_neurons",
+        "/1M_neurons_filtered_gene_bc_matrices_h5.h5"
+    )
+    download.file(url, path)
+}
+
+```
+
+# Discovery and subsetting
+
+The 10x data are 'hdf5' format files. Discover basic information about
+the dataset using the `TENxGenomics()` contructor.
+
+```{r}
+tenx <- TENxGenomics(path)
+tenx
+```
+
+The returned object is a light-weight 'view' into the file. The view
+has matrix-like semantics, with methods `dims()` (implicitly,
+`nrow()`, `ncol()`), `dimnames()` (`rownames()` and `colnames()`), and
+`[` can be used to easily subset the very large data to a more useful
+size. Subsetting supports numeric, character, and logical vectors.
+
+```{r}
+tenx[, sample(ncol(tenx), 1000)]
+colnames(tenx[, sample(ncol(tenx), 3)])
+```
+
+# Input
+
+A useful strategy when working with large data is to input portions of
+the data. This allows, for instance, management of overall memory use
+when exploiting multiple compuational cores. On typical computers it
+might be reasonable to input on the order of 10k samples at a
+time. 
+
+## Simple
+
+Use `as.matrix()` (dense matrix) or `as.dgCMatrix()` (sparse
+matrix representation) to read a subset of the actual data in to _R_.
+
+```{r}
+onek <- as.matrix(tenx[, 1:1000])
+class(onek)
+dim(onek)
+onek[1:10, 1:5]
+```
+
+Input is quickest when the colums are sequential, but one can also
+input random rows and columns. This is reasonably quick for samples up
+to about 1k.
+
+```{r}
+as.matrix(tenx[sample(nrow(tenx), 5), sample(ncol(tenx), 3)])
+```
+
+## Rich
+
+It is often helpful to place raw count data such as that returned by
+`as.matrix()` or `as.dgCMatrix()` into experimental context, e.g., the
+cell, library, and mouse from which the information has been
+derived. The [SummarizedExperiment][] package and class is the
+standard _Bioconductor_ container for this type of representation.
+
+Here we create a `SummarizedExperiment` around the `TENxGenomics`
+representation. The object infers information (as described on
+`?tenxSummarizedExperiment`) about the library and mouse brain used
+for each sample. We use this to identify 100 random cells from mouse
+"A", and 100 random cells from mouse "B".
+
+```{r}
+tenxse <- tenxSummarizedExperiment(path)
+colData(tenxse)
+n <- 100
+samples <- as.vector(vapply(
+    split(tenxse$Barcode, tenxse$Mouse),
+    sample, character(n), n
+))
+```
+
+We then instantiate the data as a `matrix` in a
+`SummarizedExperiment`, either directly from the file path, or from a
+`TENxGenomics` instance.
+
+```{r}
+library(SummarizedExperiment)
+se <- matrixSummarizedExperiment(path, j = samples)
+se
+table(se$Mouse)
+```
+
+[TENxGenomics]: https:/github.com/mtmorgan/TENxGenomics
+[10xGenomics]: https://support.10xgenomics.com/single-cell/datasets
+[BiocFileCache]: https://bioconductor.org/packages/BiocFileCache
+[SummarizedExperiment]: https://bioconductor.org/packages/SummarizedExperiment
