@@ -4,30 +4,33 @@
 \alias{tenxreduce}
 \title{Visit and 'reduce()' all values in a 10xGenomics hdf5 file.}
 \usage{
-tenxreduce(X, FUN, ..., verbose = interactive(), BLOCK = 1e+08)
+tenxreduce(f, x, init = NULL, size = 10000, verbose = interactive())
 }
 \arguments{
-\item{X}{A \code{TENxGenomics-class} instance. Rows and columns of
-\code{X} cannot be duplicated.}
+\item{f}{A function of two arguments. The first argument \code{x}
+is a list with elements \code{ridx} (row index), \code{cidx}
+(column index) and \code{value} (value). The second argument
+\code{y} is \code{init} (on first iteration) or the return
+value of the previous call to \code{f()} (all subsequent
+iterations).}
 
-\item{FUN}{A function of two arguments. The first argument is a
-list with elements \code{ridx} (row index), \code{cidx} (column
-index) and \code{value} (value). The second argument is NULL
-(on first iteration) or the return value of the previous call
-to \code{FUN} (all subsequent iterations).}
+\item{x}{A \code{TENxGenomics-class} instance. Rows and columns of
+\code{x} cannot be duplicated.}
 
-\item{...}{Additional arguments, passed to \code{FUN}.}
+\item{init}{Initial value, used as \code{y} on first call to
+\code{f()}.}
+
+\item{size}{numeric(1) Number of columns to process during each
+iteration.}
 
 \item{verbose}{logical(1) when TRUE, print a progress bar.}
-
-\item{BLOCK}{numeric(1) Number of values to process during each
-iteration.}
 }
 \description{
 This function visits all records in the hdf5 file,
     passing a list of value, row index, and column index to a
-    user-provided \code{FUN}. \code{FUN} reduces the arguments in
+    user-provided \code{f()}. \code{f()} reduces the arguments in
     an arbitary way, returning the result. All records in the hdf5
     file are visited, but only those correspond to rows or columns
-    of \code{X} are reported.
+    of \code{x} are reported. This is modeled after the base
+    function \code{Reduce()}.
 }

@@ -13,7 +13,8 @@ Description: This package provides an interface to 10xGenomics data,
     memory as dense slices (rows, columns).
 Depends: R (>= 3.4.0), methods
 Imports: rhdf5 (>= 2.19.3-2)
-Suggests: Matrix, S4Vectors, SummarizedExperiment, BiocFileCache, Rtsne
+Suggests: Matrix, S4Vectors, SummarizedExperiment, BiocFileCache, Rtsne,
+    knitr, rmarkdown
 Collate:
     TENxGenomics-class.R
     coerce.R
@@ -23,3 +24,4 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
+VignetteBuilder: knitr

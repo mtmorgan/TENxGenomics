@@ -5,3 +5,4 @@
 *.h5
 *_cache
 *_files
+inst/doc
