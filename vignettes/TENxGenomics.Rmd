@@ -150,7 +150,76 @@ to read very large volumes of data into main memory. The
 column-oriented slices filtered through the rows and columns present
 in the `TENxGenomics` argument.
 
+Here we use a smaller data set for illustrative purposes
+
+```{r bfc-2}
+library(BiocFileCache)
+bfc <- BiocFileCache()
+path <- bfcrpath(bfc, "1M_neurons_neurons20k")
+if (!file.exists(path)) {
+    url <- paste0(
+        "https://s3-us-west-2.amazonaws.com/10x.files",
+        "/samples/cell/1M_neurons",
+        "/1M_neurons_neuron20k.h5"
+    )
+    download.file(url, path)
+}
+
+tenx <- TENxGenomics(path)
+tenx
+```
+
+The `tenxreduce()` function is like `Reduce()` in base _R_: it takes a
+function `f()` that accepts two arguments, as well as a `TENxGenomics`
+instance, and optional arguments. The function `f(x, y)` is called on
+successive chunks of the hdf5 file. The first argument to `f()` is a
+list, with elements containing the row index (`x$ridx`), column index
+(`x$cidx`), and read count (`x$value`) of a slice of the hdf5
+data. The second element is either the initial value `init` on the
+first invocation of `f()`, or the value returned by the previous
+invocation. For instance, the following processes the data in chunks,
+calculating the total number of aligned reads.
+
+```{r}
+tenxreduce(
+    function(x, y) {
+        sum(x$value) + y
+    },
+    tenx,
+    init = 0L
+)
+```
+
+A second example calculates the library size of each sample.
+
+```{r}
+lib.size <- tenxreduce(
+    function(x, y) {
+        c(y, aggregate(value ~ cidx, x, sum)$value)
+    },
+    tenx,
+    init = integer(0),
+    size = 1000
+)
+hist(log10(lib.size))
+```
+
+For this data set, a faster solution is to simply read the entire data
+into memory
+
+```{r, eval=FALSE}
+m <- as.dgCMatrix(tenx)
+hist(log10(Matrix::colSums(m)))
+```
+
 # Exploratory analysis
+
+We return to our sampled SummarizedExperiment
+
+```{r}
+se
+table(se$Mouse)
+```
 
 With a reasonable subset of data in memory, it is possible to explore
 basic properties of the data.
