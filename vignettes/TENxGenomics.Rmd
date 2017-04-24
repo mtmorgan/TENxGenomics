@@ -41,6 +41,7 @@ The vignette uses large datasets made available from
 
 ```{r bfc}
 library(BiocFileCache)
+
 bfc <- BiocFileCache()
 path <- bfcrpath(bfc, "1M_neurons_filtered")
 if (!file.exists(path)) {
@@ -52,6 +53,16 @@ if (!file.exists(path)) {
     download.file(url, path)
 }
 
+bfc <- BiocFileCache()
+path <- bfcrpath(bfc, "1M_neurons_neurons20k")
+if (!file.exists(path)) {
+    url <- paste0(
+        "https://s3-us-west-2.amazonaws.com/10x.files",
+        "/samples/cell/1M_neurons",
+        "/1M_neurons_neuron20k.h5"
+    )
+    download.file(url, path)
+}
 ```
 
 # Discovery and subsetting
@@ -139,10 +150,10 @@ se
 table(se$Mouse)
 ```
 
-## Iteration
+## Iterative
 
-Simple or rich input is useful when wishing to work with only a small
-portion of the data, especially during exploratory phases of
+Simple or rich input is useful when wishing to work with a portion of
+the data that fits in memory, especially during exploratory phases of
 analysis. Processing the whole file requires some kind of iterative
 approach because, like all programming lagauges, it makes little sense
 to read very large volumes of data into main memory. The
@@ -153,18 +164,7 @@ in the `TENxGenomics` argument.
 Here we use a smaller data set for illustrative purposes
 
 ```{r bfc-2}
-library(BiocFileCache)
-bfc <- BiocFileCache()
 path <- bfcrpath(bfc, "1M_neurons_neurons20k")
-if (!file.exists(path)) {
-    url <- paste0(
-        "https://s3-us-west-2.amazonaws.com/10x.files",
-        "/samples/cell/1M_neurons",
-        "/1M_neurons_neuron20k.h5"
-    )
-    download.file(url, path)
-}
-
 tenx <- TENxGenomics(path)
 tenx
 ```
@@ -182,10 +182,10 @@ calculating the total number of aligned reads.
 
 ```{r}
 tenxreduce(
+    tenx,
     function(x, y) {
         sum(x$value) + y
     },
-    tenx,
     init = 0L
 )
 ```
@@ -194,18 +194,18 @@ A second example calculates the library size of each sample.
 
 ```{r}
 lib.size <- tenxreduce(
+    tenx,
     function(x, y) {
         c(y, aggregate(value ~ cidx, x, sum)$value)
     },
-    tenx,
     init = integer(0),
     size = 1000
 )
 hist(log10(lib.size))
 ```
 
-For this data set, a faster solution is to simply read the entire data
-into memory
+For this data set, which fits relatively easily in memory, a faster
+solution is to simply read the entire data into memory
 
 ```{r, eval=FALSE}
 m <- as.dgCMatrix(tenx)
