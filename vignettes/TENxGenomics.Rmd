@@ -41,28 +41,14 @@ The vignette uses large datasets made available from
 
 ```{r bfc}
 library(BiocFileCache)
-
 bfc <- BiocFileCache()
-path <- bfcrpath(bfc, "1M_neurons_filtered")
-if (!file.exists(path)) {
-    url <- paste0(
-        "https://s3-us-west-2.amazonaws.com/10x.files",
-        "/samples/cell/1M_neurons",
-        "/1M_neurons_filtered_gene_bc_matrices_h5.h5"
-    )
-    download.file(url, path)
-}
 
-bfc <- BiocFileCache()
-path <- bfcrpath(bfc, "1M_neurons_neurons20k")
-if (!file.exists(path)) {
-    url <- paste0(
-        "https://s3-us-west-2.amazonaws.com/10x.files",
-        "/samples/cell/1M_neurons",
-        "/1M_neurons_neuron20k.h5"
-    )
-    download.file(url, path)
-}
+oneM <- paste0(
+    "https://s3-us-west-2.amazonaws.com/10x.files/",
+    "samples/cell/1M_neurons/",
+    "1M_neurons_filtered_gene_bc_matrices_h5.h5"
+)
+path <- bfcrpath(bfc, oneM)
 ```
 
 # Discovery and subsetting
@@ -164,7 +150,12 @@ in the `TENxGenomics` argument.
 Here we use a smaller data set for illustrative purposes
 
 ```{r bfc-2}
-path <- bfcrpath(bfc, "1M_neurons_neurons20k")
+twentyK <- paste0(
+    "https://s3-us-west-2.amazonaws.com/10x.files/",
+    "samples/cell/1M_neurons/",
+    "1M_neurons_neuron20k.h5"
+)
+path <- bfcrpath(bfc, twentyK)
 tenx <- TENxGenomics(path)
 tenx
 ```
