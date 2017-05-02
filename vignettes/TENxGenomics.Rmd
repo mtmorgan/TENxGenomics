@@ -272,3 +272,4 @@ sessionInfo()
 [10xGenomics]: https://support.10xgenomics.com/single-cell/datasets
 [BiocFileCache]: https://bioconductor.org/packages/BiocFileCache
 [SummarizedExperiment]: https://bioconductor.org/packages/SummarizedExperiment
+[DelayedArray]: https://bioconductor.org/packages/DelayedArray
