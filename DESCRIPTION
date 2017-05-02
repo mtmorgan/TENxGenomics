@@ -1,6 +1,6 @@
 Package: TENxGenomics
 Title: Interface to 10x Genomics data
-Version: 0.0.15
+Version: 0.0.16
 Authors@R:
     person(
         "Martin", "Morgan", email = "Martin.Morgan@RoswellPark.org",
@@ -12,7 +12,7 @@ Description: This package provides an interface to 10xGenomics data,
     including convenient subsetting to data that easily fit in R
     memory as dense slices (rows, columns).
 Depends: R (>= 3.4.0), methods, DelayedArray
-Imports: rhdf5 (>= 2.19.3-2), tools, BiocGenerics, S4Vectors, IRanges, HDF5Array
+Imports: rhdf5 (>= 2.19.3-2), tools, BiocGenerics, S4Vectors, IRanges, HDF5Array (>= 1.5.1)
 Suggests: Matrix, S4Vectors, SummarizedExperiment, BiocFileCache, Rtsne,
     knitr, rmarkdown
 Collate:
