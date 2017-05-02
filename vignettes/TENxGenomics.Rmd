@@ -101,6 +101,20 @@ to about 1k.
 as.matrix(tenx[sample(nrow(tenx), 5), sample(ncol(tenx), 3)])
 ```
 
+## Using a TENxMatrix object
+
+An alternative to creating `TENxGenomics` object `tenx` is to wrap the
+10xGenomics data in a `TENxMatrix` object.
+
+```{r}
+tenxmat <- TENxMatrix(path)
+```
+
+The `TENxMatrix` class extends the `DelayedArray` class defined in the
+[DelayedArray][] package so all the operations available on `DelayedArray`
+objects work on `TENxMatrix` objects. See `?DelayedArray` for more
+information.
+
 ## Rich
 
 It is often helpful to place raw count data such as that returned by
