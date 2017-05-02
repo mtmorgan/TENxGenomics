@@ -4,42 +4,32 @@
 \name{TENxMatrix-class}
 \alias{TENxMatrix-class}
 \alias{TENxMatrixSeed-class}
-\alias{TENxMatrixSeed}
 \alias{dim,TENxMatrixSeed-method}
 \alias{dimnames,TENxMatrixSeed-method}
 \alias{TENxMatrix-class}
-\alias{DelayedArray,TENxMatrixSeed-method}
 \alias{TENxMatrix}
 \title{TENxMatrix objects}
 \usage{
-TENxMatrixSeed(h5path, group = "mm10")
-
 \S4method{dim}{TENxMatrixSeed}(x)
 
 \S4method{dimnames}{TENxMatrixSeed}(x)
 
-\S4method{DelayedArray}{TENxMatrixSeed}(seed)
-
 TENxMatrix(h5path, group = "mm10")
 }
 \arguments{
+\item{x}{A \code{TENxMatrix-class} or \code{TENxMatrixSeed-class}
+object.}
+
 \item{h5path}{character(1) path to the 10xGenomics hdf5 file, or a
 \code{TENxMatrixSeed} instance.}
 
 \item{group}{character(1) group (e.g., \dQuote{mm10}) containing
 scRNA-seq data; only allowed when \code{h5path} is a
 character(1).}
-
-\item{x}{A \code{TENxMatrix-class} or \code{TENxMatrixSeed-class}
-object.}
-
-\item{seed}{A \code{TENxMatrixSeed} instance.}
 }
 \value{
-\code{TENxMatrixSeed()} returns a TENxMatrixSeed instance.
-
 \code{TENxMatrix()} returns a TENxMatrix instance;
-    \code{dim()} and \code{dimnames()} and all other
+    \code{dim()}, \code{dimnames()} and all other
     \code{DelayedArray} methods operate on this instance.
 }
 \description{

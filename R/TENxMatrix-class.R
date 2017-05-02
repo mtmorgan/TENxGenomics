@@ -10,6 +10,8 @@
 #'
 #' @aliases TENxMatrixSeed-class
 #'
+#' @aliases DelayedArray,TENxMatrixSeed-method
+#'
 #' @description A container for representing 10xGenomics data.
 #'     TENxMatrix extends \link{DelayedArray} so all the operations
 #'     available on \link{DelayedArray} objects work on TENxMatrix objects.
@@ -69,18 +71,6 @@ setClass("TENxMatrixSeed",
 .get_shape <- function(file, group, idx=NULL)
     .get_TENx_component(file, group, "shape", idx=idx)
 
-#' @rdname TENxMatrix-class
-#'
-#' @param h5path character(1) path to the 10xGenomics hdf5 file, or a
-#'     \code{TENxMatrixSeed} instance.
-#'
-#' @param group character(1) group (e.g., \dQuote{mm10}) containing
-#'     scRNA-seq data; only allowed when \code{h5path} is a
-#'     character(1).
-#'
-#' @return \code{TENxMatrixSeed()} returns a TENxMatrixSeed instance.
-#'
-#' @export TENxMatrixSeed
 TENxMatrixSeed <- function(h5path, group="mm10")
 {
     if (!isSingleString(h5path))
@@ -199,13 +189,6 @@ setClass("TENxMatrix", contains="DelayedMatrix")
 
 setValidity2("TENxMatrix", .validate_TENxMatrix)
 
-#' @rdname TENxMatrix-class
-#'
-#' @aliases DelayedArray,TENxMatrixSeed-method
-#'
-#' @param seed A \code{TENxMatrixSeed} instance.
-#'
-#' @exportMethod DelayedArray
 setMethod("DelayedArray", "TENxMatrixSeed",
     function(seed) DelayedArray:::new_DelayedArray(seed, Class="TENxMatrix")
 )
@@ -214,8 +197,15 @@ setMethod("DelayedArray", "TENxMatrixSeed",
 ### with a single argument.
 #' @rdname TENxMatrix-class
 #'
+#' @param h5path character(1) path to the 10xGenomics hdf5 file, or a
+#'     \code{TENxMatrixSeed} instance.
+#'
+#' @param group character(1) group (e.g., \dQuote{mm10}) containing
+#'     scRNA-seq data; only allowed when \code{h5path} is a
+#'     character(1).
+#'
 #' @return \code{TENxMatrix()} returns a TENxMatrix instance;
-#'     \code{dim()} and \code{dimnames()} and all other
+#'     \code{dim()}, \code{dimnames()} and all other
 #'     \code{DelayedArray} methods operate on this instance.
 #'
 #' @export
