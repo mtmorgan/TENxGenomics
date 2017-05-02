@@ -96,18 +96,19 @@ setAs("TENxGenomics", "matrix", function(from) as.matrix.TENxGenomics(from))
 #'     \code{as.matrix(withDimnames=FALSE)} to suppress dimnames on
 #'     the returned matrix.
 #'
+#' @importFrom Matrix sparseMatrix
+#'
 #' @export
 as.dgCMatrix <-
     function(x, ..., withDimnames=TRUE)
 {
-    .requireMatrix()
     # TODO: Support withDimnames
     stopifnot(withDimnames)
     values_and_indices <- .values_and_indices(
         x, ..., withDimnames = withDimnames
     )
 
-    Matrix::sparseMatrix(
+    sparseMatrix(
         i = values_and_indices[["ridx"]],
         j = values_and_indices[["cidx"]],
         x = values_and_indices[["values"]],

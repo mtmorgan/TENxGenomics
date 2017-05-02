@@ -1,19 +1,5 @@
-.requireSummarizedExperiment <-
-    function()
-{
-    requireNamespace("S4Vectors", quietly=TRUE)
-    requireNamespace("SummarizedExperiment", quietly=TRUE)
-    if (!"SummarizedExperiment" %in% sub("package:", "", search()))
-        message("use 'library(\"SummarizedExperiment\")' to access this object")
-}
-
-.requireMatrix <-
-    function()
-{
-    requireNamespace("Matrix")
-    if (!"Matrix" %in% sub("package:", "", search()))
-        message("use 'library(\"Matrix\")' to access this object")
-}
+#' @importFrom S4Vectors DataFrame
+#' @importFrom SummarizedExperiment SummarizedExperiment
 
 .tenxGenomics <-
     function(h5path, i, j)
@@ -33,9 +19,9 @@
     function(x, rowData)
 {
     if (!missing(rowData))
-        return(S4Vectors::DataFrame(rowData))
+        return(DataFrame(rowData))
 
-    S4Vectors::DataFrame(
+    DataFrame(
         Ensembl = rownames(x),
         Symbol = h5read(.h5path(x), .genenames(x), list(.rowidx(x)))
     )
@@ -48,7 +34,7 @@
     sequence <- sub("-.*", "", barcode)
     lib <- as.integer(sub(".*-", "", barcode))
     mouse <- ifelse(lib <= 69, "A", "B")
-    S4Vectors::DataFrame(
+    DataFrame(
         Barcode = barcode,
         Sequence = sequence,
         Library = lib,
@@ -60,7 +46,7 @@
     function(x, colData)
 {
     if (!missing(colData))
-        S4Vectors::DataFrame(colData)
+        DataFrame(colData)
     else {
         tryCatch({
             .colData_1M_neurons(x)
@@ -69,7 +55,7 @@
                  "failed to create colData:",
                  "\n  ", conditionMessage(e)
              )
-             S4Vectors::DataFrame(i=seq_len(ncol(x)))[, FALSE]
+             DataFrame(i=seq_len(ncol(x)))[, FALSE]
         })
     }
 }
@@ -77,12 +63,10 @@
 .as.SummarizedExperiment <-
     function(tenx, rowData, colData, how)
 {
-    .requireSummarizedExperiment()
-
     rowData <- .rowData(tenx, rowData)
     colData <- .colData(tenx, colData)
 
-    SummarizedExperiment::SummarizedExperiment(
+    SummarizedExperiment(
         assays = list(how(tenx)), rowData = rowData, colData = colData
     )
 }
@@ -161,8 +145,6 @@ as.tenxSummarizedExperiment <-
 matrixSummarizedExperiment <-
     function(h5path, i, j, rowData, colData)
 {
-    .requireSummarizedExperiment()
-
     tenx <- .tenxGenomics(h5path, i, j)
     as.matrixSummarizedExperiment(tenx, rowData, colData)
 }

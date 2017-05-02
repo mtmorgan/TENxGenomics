@@ -5,8 +5,9 @@
 \alias{TENxGenomics}
 \alias{dim,TENxGenomics-method}
 \alias{dimnames,TENxGenomics-method}
-\alias{[,TENxGenomics-method}
+\alias{[,TENxGenomics,ANY,ANY,ANY-method}
 \alias{[,TENxGenomics,ANY,ANY-method}
+\alias{[,TENxGenomics-method}
 \alias{show,TENxGenomics-method}
 \alias{as.matrix.TENxGenomics}
 \alias{coerce,TENxGenomics,matrix-method}
@@ -20,7 +21,7 @@ TENxGenomics(h5path)
 
 \S4method{dimnames}{TENxGenomics}(x)
 
-\S4method{[}{TENxGenomics}(x, i, j, ..., drop = TRUE)
+\S4method{[}{TENxGenomics,ANY,ANY,ANY}(x, i, j, ..., drop = TRUE)
 
 \S4method{show}{TENxGenomics}(object)
 
