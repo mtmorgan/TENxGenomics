@@ -4,6 +4,8 @@
 
 #' @rdname TENxMatrix-class
 #'
+#' @name TENxMatrix-class
+#'
 #' @title TENxMatrix objects
 #'
 #' @description A container for representing 10xGenomics data.
@@ -15,8 +17,9 @@
 #' @exportMethod dim dimnames coerce
 #' @import methods BiocGenerics S4Vectors IRanges DelayedArray HDF5Array
 #' @importFrom tools file_path_as_absolute
-#' @aliases dim,TENxMatrixSeed-method
-#' @aliases dimnames,TENxMatrixSeed-method
+#' @aliases TENxMatrixSeed TENxMatrix
+#' @aliases dim,TENxMatrixSeed-method dimnames,TENxMatrixSeed-method
+#' @aliases DelayedArray,TENxMatrixSeed-method
 
 
 setClass("TENxMatrixSeed",
@@ -28,7 +31,9 @@ setClass("TENxMatrixSeed",
                               # 10xGenomics data.
         dim="integer",
         dimnames="list",
-        col_ranges="IRanges"
+        col_ranges="data.frame"  # Can't use an IRanges object for this at the
+                                 # moment because they don't support Linteger
+                                 # start/end values yet.
     )
 )
 
@@ -38,7 +43,7 @@ setClass("TENxMatrixSeed",
     name <- paste0(group, "/", name)
     if (!is.null(idx))
         idx <- list(idx)
-    as.vector(HDF5Array:::h5read2(file, name, index=idx))
+    as.vector(h5read(file, name, index=idx))
 }
 
 .get_barcodes <- function(file, group, idx=NULL)
@@ -57,7 +62,12 @@ setClass("TENxMatrixSeed",
     .get_TENx_component(file, group, "indices", idx=idx)
 
 .get_indptr <- function(file, group, idx=NULL)
-    .get_TENx_component(file, group, "indptr", idx=idx)
+{
+    name <- paste0(group, "/indptr")
+    if (!is.null(idx))
+        idx <- list(idx)
+    as.vector(h5read(file, name, index=idx, bit64conversion="double"))
+}
 
 .get_shape <- function(file, group, idx=NULL)
     .get_TENx_component(file, group, "shape", idx=idx)
@@ -95,7 +105,8 @@ TENxMatrixSeed <- function(file, group="mm10")
     stopifnot(length(indptr) == dim[[2L]] + 1L,
               indptr[[1L]] == 0L,
               indptr[[length(indptr)]] == data_len)
-    col_ranges <- as(PartitioningByEnd(indptr[-1L]), "IRanges")
+    col_ranges <- data.frame(start=indptr[-length(indptr)] + 1,
+                             width=as.integer(diff(indptr)))
 
     new2("TENxMatrixSeed", file=file,
                            group=group,
@@ -108,6 +119,17 @@ setMethod("dim", "TENxMatrixSeed", function(x) x@dim)
 
 setMethod("dimnames", "TENxMatrixSeed", function(x) x@dimnames)
 
+### S4Vectors:::fancy_mseq() does not accept 'offset' of type double yet so
+### we implement a version that does.
+.fancy_mseq <- function(lengths, offset=0)
+{
+    lengths_len <- length(lengths)
+    if (lengths_len == 0L)
+        return(numeric(0))
+    offsets <- offset - cumsum(c(0L, lengths[-lengths_len]))
+    seq_len(sum(lengths)) + rep.int(offsets, lengths)
+}
+
 .subset_TENxMatrixSeed_as_array <- function(seed, index)
 {
     ans_dim <- DelayedArray:::get_subscripts_lengths(index, dim(seed))
@@ -116,10 +138,12 @@ setMethod("dimnames", "TENxMatrixSeed", function(x) x@dimnames)
     i <- index[[2L]]
     if (is.name(i))
         i <- seq_len(ncol(ans))
-    col_ranges2 <- seed@col_ranges[i]
-    idx2 <- as.integer(col_ranges2)
+    col_ranges2 <- S4Vectors:::extract_data_frame_rows(seed@col_ranges, i)
+    start2 <- col_ranges2[ , "start"]
+    width2 <- col_ranges2[ , "width"]
+    idx2 <- .fancy_mseq(width2, offset=start2 - 1)
     i2 <- .get_indices(seed@file, seed@group, idx=idx2) + 1L
-    j2 <- rep.int(seq_along(i), width(col_ranges2))
+    j2 <- rep.int(seq_along(i), width2)
 
     j <- index[[1L]]
     if (!is.name(j)) {
