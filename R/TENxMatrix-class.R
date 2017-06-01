@@ -147,19 +147,22 @@ setMethod("dimnames", "TENxMatrixSeed", function(x) x@dimnames)
     ans_dim <- DelayedArray:::get_Nindex_lengths(index, dim(seed))
     ans <- array(0L, dim=ans_dim)
 
-    i <- index[[2L]]
-    if (is.name(i))
-        i <- seq_len(ncol(ans))
-    col_ranges2 <- S4Vectors:::extract_data_frame_rows(seed@col_ranges, i)
-    start2 <- col_ranges2[ , "start"]
-    width2 <- col_ranges2[ , "width"]
+    j <- index[[2L]]
+    col_ranges <- seed@col_ranges
+    if (is.null(j)) {
+        j <- seq_len(ncol(ans))
+    } else {
+        col_ranges <- S4Vectors:::extract_data_frame_rows(col_ranges, j)
+    }
+    start2 <- col_ranges[ , "start"]
+    width2 <- col_ranges[ , "width"]
     idx2 <- .fancy_mseq(width2, offset=start2 - 1)
     i2 <- .get_indices(seed@file, seed@group, idx=idx2) + 1L
-    j2 <- rep.int(seq_along(i), width2)
+    j2 <- rep.int(seq_along(j), width2)
 
-    j <- index[[1L]]
-    if (!is.name(j)) {
-        m <- findMatches(i2, j)
+    i <- index[[1L]]
+    if (!is.null(i)) {
+        m <- findMatches(i2, i)
         idx2 <- idx2[from(m)]
         i2 <- to(m)
         j2 <- j2[from(m)]
