@@ -20,14 +20,14 @@ Description: This package provides an interface to 10xGenomics data,
     'DelayedArray' instances.
 Depends: R (>= 3.4.0), methods, Matrix, SummarizedExperiment, DelayedArray
 Imports: rhdf5 (>= 2.19.3-2), tools, BiocGenerics, S4Vectors, IRanges,
-    HDF5Array (>= 1.5.1)
+    HDF5Array (>= 1.5.1), BiocParallel (>= 1.11.2)
 Suggests: knitr, rmarkdown, BiocFileCache, Rtsne
 Collate:
     TENxGenomics-class.R
     coerce.R
     TENxMatrix-class.R
     tenxSummarizedExperiment.R
-    tenxreduce.R
+    tenxiterate.R
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true

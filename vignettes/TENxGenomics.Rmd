@@ -174,48 +174,79 @@ tenx <- TENxGenomics(path)
 tenx
 ```
 
-The `tenxreduce()` function is like `Reduce()` in base _R_: it takes a
-function `f()` that accepts two arguments, as well as a `TENxGenomics`
-instance, and optional arguments. The function `f(x, y)` is called on
-successive chunks of the hdf5 file. The first argument to `f()` is a
-list, with elements containing the row index (`x$ridx`), column index
-(`x$cidx`), and read count (`x$value`) of a slice of the hdf5
-data. The second element is either the initial value `init` on the
-first invocation of `f()`, or the value returned by the previous
-invocation. For instance, the following processes the data in chunks,
+The `tenxiterate()` function takes a `TENxGenomics` instance and a
+function `FUN()`. `FUN()` accepts at least one argument, e.g.,
+`x`. `FUN(x, ...)` is called on successive chunks of the hdf5
+file. The argument `x` is a list, with elements containing the row
+index (`x$ridx`), column index (`x$cidx`), and read count (`x$value`)
+of a slice of the hdf5 data. `FUN()` peforms arbitrary transformations
+on the data, and the result is accumulated across chunks. The function
+is implemented on top of `BiocParallel::bpiterate()`, so supports
+parallel processing. The following processes the data in chunks,
 calculating the total number of aligned reads.
 
 ```{r}
-tenxreduce(
-    tenx,
-    function(x, y) {
-        sum(x$value) + y
-    },
-    init = 0L
+BiocParallel::register(
+    BiocParallel::MulticoreParam(progressbar = FALSE)
 )
+result <- tenxiterate(tenx, function(x) sum(x$value))  # reads per chunk
+sum(unlist(result))                                    # reads total
 ```
 
-A second example calculates the library size of each sample.
+The following summarizes the row and column margins, with `n` the
+number of non-zero cells and `sum` the number of reads per row or
+column. The chunks are 'sparse' representations, with continguous
+columns, so efficient processing takes different stratgies. Some care
+is also taken to reduce (though not minimize) the size of data
+returned by the function, for better performance when evaluated in a
+parallel context.
 
 ```{r}
-lib.size <- tenxreduce(
-    tenx,
-    function(x, y) {
-        c(y, aggregate(value ~ cidx, x, sum)$value)
-    },
-    init = integer(0),
-    size = 1000
-)
-hist(log10(lib.size))
+margin.summary <- function(x, nrow) {
+    ## > str(x)
+    ## List of 3
+    ##  $ ridx : num [1:20548381] 8 9 17 39 52 63 118 119 123 182 ...
+    ##  $ cidx : num [1:20548381] 1 1 1 1 1 1 1 1 1 1 ...
+    ##  $ value: int [1:20548381] 1 1 2 2 1 7 2 1 1 1 ...
+
+    ## rows: summarize all rows, whether in current sample or not.
+    ridx <- structure(                  # quick 'factor'
+        x$ridx, .Label=as.character(seq_len(nrow)), class="factor"
+    )
+    rowdf <- data.frame(
+        ridx = seq_len(nrow),
+        n = tabulate(x$ridx, nrow),
+        sum = vapply(split(x$value, ridx), sum, numeric(1), USE.NAMES=FALSE)
+    )
+
+    ## columns: summarized cells (complete) in current sample
+    ucidx <- unique(x$cidx)
+    x$cidx <- match(x$cidx, ucidx)
+    coldf <- data.frame(
+        cidx = ucidx,
+        n = tabulate(x$cidx, length(ucidx)),
+        sum = vapply(split(x$value, x$cidx), sum, numeric(1), USE.NAMES=FALSE)
+    )
+
+    list(rowdf = rowdf, coldf = coldf)
+}
 ```
 
-For this data set, which fits relatively easily in memory, a faster
-solution is to simply read the entire data into memory
+The margin summary can be calculated as
 
 ```{r, eval=FALSE}
-m <- as.dgCMatrix(tenx)
-hist(log10(Matrix::colSums(m)))
+register(MulticoreParam(progressbar=TRUE))
+result <- tenxiterate(tenx, MAP, nrow = nrow(tenx))
+rows <- Reduce(function(x, y) {
+    idx <- c("n", "sum")
+    x[, idx] <- x[, idx] + y[, idx]
+    x
+}, lapply(result, `[[`, 1))
+cols <- do.call("rbind", lapply(result, `[[`, 2))
 ```
+
+The summary takes about 8 minutes to read and process the entire
+million-cell data set using 6 cores and `yieldSize = 10000`.
 
 # Exploratory analysis
 
