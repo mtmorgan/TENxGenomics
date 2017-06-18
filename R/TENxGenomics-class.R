@@ -5,6 +5,7 @@
     "TENxGenomics",
     slots = c(
         h5path = "character",
+        group = "character",
         colidx = "integer",
         rowidx = "integer",
         ## internal
@@ -16,12 +17,12 @@
         indptr = "character"
     ),
     prototype = prototype(
-        dataname = "/mm10/data",
-        rowname = "/mm10/genes",
-        genenames = "/mm10/gene_names",
-        colname = "/mm10/barcodes",
-        indices = "/mm10/indices",
-        indptr = "/mm10/indptr"
+        dataname = "data",
+        rowname = "genes",
+        genenames = "gene_names",
+        colname = "barcodes",
+        indices = "indices",
+        indptr = "indptr"
     )
 )
 
@@ -31,17 +32,21 @@
 
 .rowidx <- function(x) x@rowidx
 
-.dataname <- function(x) x@dataname
+.group <- function(x) x@group
 
-.rowname <- function(x) x@rowname
+.path <- function(x, path) paste0("/", .group(x), "/", path)
 
-.genenames <- function(x) x@genenames
+.dataname <- function(x) .path(x, x@dataname)
 
-.colname <- function(x) x@colname
+.rowname <- function(x) .path(x, x@rowname)
 
-.indptr <- function(x) x@indptr
+.genenames <- function(x) .path(x, x@genenames)
 
-.indices <- function(x) x@indices
+.colname <- function(x) .path(x, x@colname)
+
+.indptr <- function(x) .path(x, x@indptr)
+
+.indices <- function(x) .path(x, x@indices)
 
 .h5_dimidx <-
     function(h5f, name)
@@ -64,22 +69,27 @@
 #'
 #' @param h5path character(1) file path to a 1M_neurons_*.h5 file.
 #'
+#' @param group character(1) hdf5 group (e.g., \dQuote{mm10}) containing
+#'     scRNA-seq data.
+#'
 #' @return \code{TENxGenomics()} returns a \code{TENxGenomics-class}
 #'     instance.
 #'
 #' @export
 TENxGenomics <-
-    function(h5path)
+    function(h5path, group="mm10")
 {
     stopifnot(
         is.character(h5path), length(h5path) == 1L, !is.na(h5path),
-        nzchar(h5path), file.exists(h5path)
+        nzchar(h5path), file.exists(h5path),
+        is.character(group), length(group) == 1L, !is.na(group),
+        nzchar(group)
     )
 
     h5f <- H5Fopen(h5path)
     on.exit(H5Fclose(h5f))
 
-    tmpl <- .TENxGenomics()
+    tmpl <- .TENxGenomics(group = group)
     rowidx <- .h5_dimidx(h5f, .rowname(tmpl))
     colidx <- .h5_dimidx(h5f, .colname(tmpl))
 
