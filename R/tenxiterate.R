@@ -1,6 +1,4 @@
-#' @rdname tenxiterate
-#'
-#' @title Visit and 'reduce()' all values in a 10xGenomics hdf5 file.
+#' Visit and 'reduce()' all values in a 10xGenomics hdf5 file.
 #'
 #' This function visits all records in the hdf5 file, passing a
 #' 'chunk' containing a list of value, row index, and column index to
