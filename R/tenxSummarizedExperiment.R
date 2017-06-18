@@ -113,6 +113,11 @@
 #'     the SummarizedExperiment, and coerce it to a, e.g,. matrix,
 #'     \code{as.matrix(assay(se[, 1:100]))}.
 #'
+#' @return \code{assay()} and \code{assays()} must use
+#'     \code{withDimnames=FALSE} when called on a
+#'     \code{tenxSummarizedExperiment}-created instance; dimnames are
+#'     from the underlying file rather than SummarizedExperiment.
+#'
 #' @export
 tenxSummarizedExperiment <-
     function(h5path, i, j, rowData, colData)
@@ -136,7 +141,7 @@ as.tenxSummarizedExperiment <-
 #' @return \code{matrixSummarizedExperiment()} and
 #'     \code{as.matrixSummarizedExperiment()} return a
 #'     \code{SummarizedExperiment} instance where the assay() data are
-#'     represented as a \code{Matrix::dgCMatrix} object. There are
+#'     represented as a \code{base::matrix} object. There are
 #'     practical limits to the size of this object (e.g., 20k
 #'     samples); the code is most efficient when consecutive samples
 #'     are selected.
