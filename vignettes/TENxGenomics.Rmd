@@ -236,7 +236,7 @@ The margin summary can be calculated as
 
 ```{r, eval=FALSE}
 register(MulticoreParam(progressbar=TRUE))
-result <- tenxiterate(tenx, MAP, nrow = nrow(tenx))
+result <- tenxiterate(tenx, margin.summary, nrow = nrow(tenx))
 rows <- Reduce(function(x, y) {
     idx <- c("n", "sum")
     x[, idx] <- x[, idx] + y[, idx]
