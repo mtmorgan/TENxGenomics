@@ -2,7 +2,18 @@
 % Please edit documentation in R/tenxiterate.R
 \name{tenxiterate}
 \alias{tenxiterate}
-\title{Visit and 'reduce()' all values in a 10xGenomics hdf5 file.}
+\title{Visit and 'reduce()' all values in a 10xGenomics hdf5 file.
+
+This function visits all records in the hdf5 file, passing a
+'chunk' containing a list of value, row index, and column index to
+a user-provided \code{FUN()}. The chunks represent one or more
+complete cells (columns); the number of cells is controled by
+\code{yieldSize}. \code{FUN()} manipulates the arguments (typically
+a data reduction) in an arbitary way, returning the result.
+
+All records in the hdf5 file are visited, but only those correspond
+to rows or columns of \code{X} are reported. The implementation
+uses [BiocParallel::bpiterate()].}
 \usage{
 tenxiterate(X, FUN, ..., yieldSize = 10000)
 }
@@ -20,17 +31,4 @@ is a list with elements \code{ridx} (row index), \code{cidx}
 
 \item{yieldSize}{numeric(1) Number of columns (cells) to process
 during each iteration.}
-}
-\description{
-This function visits all records in the hdf5 file,
-    passing a 'chunk' containing a list of value, row index, and
-    column index to a user-provided \code{FUN()}. The chunks
-    represent one or more complete cells (columns); the number of
-    cells is controled by \code{yieldSize}. \code{FUN()}
-    manipulates the arguments (typically a data reduction) in an
-    arbitary way, returning the result.
-
-    All records in the hdf5 file are visited, but only those
-    correspond to rows or columns of \code{X} are reported. The
-    implementation uses [BiocParallel::bpiterate()]
 }

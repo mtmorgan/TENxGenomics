@@ -69,7 +69,7 @@ columns of \code{x}.}
 }
 \description{
 The TENxGenomics class provides a simple interface to
-    subset and input 10xGenomis'
+    subset and input 10xGenomics'
     1M_neurons_filtered_gene_bc_matrices_h5.h5 file. Subsetting is
     a light-weight operation; input (typically of the subset
     matrix) is as a dense matrix and hence consumes memory.
