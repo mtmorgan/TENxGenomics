@@ -39,7 +39,7 @@ tenxiterate <-
             yieldSize > 0
     )
 
-    h5f <- H5Fopen(.h5path(X))
+    h5f <- H5Fopen(.h5path(X), "H5F_ACC_RDONLY")
     h5indptr <- H5Dopen(h5f, .indptr(X))
 
     datalen <- H5Sget_simple_extent_dims(H5Dget_space(h5indptr))$size
@@ -71,7 +71,7 @@ tenxiterate <-
 
 ## forward yield coordinates (*not* data) to worker
 .YIELD_MAP <- function(X, start, block) {
-    h5f <- H5Fopen(.h5path(X))
+    h5f <- H5Fopen(.h5path(X), "H5F_ACC_RDONLY")
     on.exit(H5Fclose(h5f))
 
     offsets <- h5read(

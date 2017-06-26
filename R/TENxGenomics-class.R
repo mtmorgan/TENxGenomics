@@ -86,7 +86,7 @@ TENxGenomics <-
         nzchar(group)
     )
 
-    h5f <- H5Fopen(h5path)
+    h5f <- H5Fopen(h5path, "H5F_ACC_RDONLY")
     on.exit(H5Fclose(h5f))
 
     tmpl <- .TENxGenomics(group = group)
@@ -121,7 +121,7 @@ setMethod("dimnames", "TENxGenomics",
 {
     dim <- dim(x)
 
-    h5f <- H5Fopen(.h5path(x))
+    h5f <- H5Fopen(.h5path(x), "H5F_ACC_RDONLY")
     on.exit(H5Fclose(h5f))
 
     list(
@@ -137,7 +137,7 @@ setMethod("dimnames", "TENxGenomics",
 .subset_from_character <-
     function(x, name, idx, i)
 {
-    h5f <- H5Fopen(.h5path(x))
+    h5f <- H5Fopen(.h5path(x), "H5F_ACC_RDONLY")
     on.exit(H5Fclose(h5f))
 
     names <- h5read(h5f, name, index = list(idx))

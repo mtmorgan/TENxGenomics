@@ -11,7 +11,7 @@
         !is.na(withDimnames)
     )
 
-    h5f <- H5Fopen(.h5path(x))
+    h5f <- H5Fopen(.h5path(x), "H5F_ACC_RDONLY")
     on.exit(H5Fclose(h5f))
 
     ## maximum index; needed when selecting last individual
