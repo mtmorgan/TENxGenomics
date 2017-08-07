@@ -20,7 +20,7 @@ Analysis strategies
 Data representation
 
 \begin{itemize}
-\item \item 10x default -- too clever
+\item 10x default -- too clever
 \item rectangular
 \item restfulSE
 \item metadata -- scraping (yuck)
