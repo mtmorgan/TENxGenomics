@@ -1,0 +1,45 @@
+\documentclass{article}
+
+<<style-Sweave, eval=TRUE, echo=FALSE, results=tex>>=
+BiocStyle::latex2()
+@ 
+
+\begin{document}
+
+Introduction
+
+Analysis strategies
+
+\begin{itemize}
+\item Exploratory analysis -- downsampling
+\item Iteration
+\item Query
+\item Reduction
+\end{itemize}
+
+Data representation
+
+\begin{itemize}
+\item \item 10x default -- too clever
+\item rectangular
+\item restfulSE
+\item metadata -- scraping (yuck)
+\end{itemize}
+
+I/O and Bioconductor 
+
+\begin{itemize}
+\item Semantically rich wrappers -- SummarizedExperiment
+\item matrix() -- during exploratory phase
+\item DelayedArray / HDF5Array() -- iteration
+\item sparse matrix more memory efficient, but only a sweet spot of
+  relevance -- large but not too large
+\end{itemize}
+
+Summary statistics
+
+Large-scale clustering and classification
+
+Derived analysis
+
+\end{document}
