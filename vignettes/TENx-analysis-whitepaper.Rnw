@@ -29,7 +29,8 @@ Data representation
 I/O and Bioconductor 
 
 \begin{itemize}
-\item Semantically rich wrappers -- SummarizedExperiment
+\item Semantically rich wrappers -- SummarizedExperiment /
+  SingleCellExperiment
 \item matrix() -- during exploratory phase
 \item DelayedArray / HDF5Array() -- iteration
 \item sparse matrix more memory efficient, but only a sweet spot of
