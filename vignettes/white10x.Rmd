@@ -1,0 +1,160 @@
+---
+title: "Data architecture and analysis for single-cell genomics: Approaches in Bioconductor"
+author: "Vincent J. Carey, stvjc at channing.harvard.edu"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{TENxGenomics: White paper}
+  %\VignetteEncoding{UTF-8}
+output:
+  BiocStyle::pdf_document:
+    toc: yes 
+    number_sections: yes 
+  BiocStyle::html_document:
+    highlight: pygments
+    number_sections: yes 
+    theme: united
+    toc: yes 
+---
+
+# Introduction
+
+The advent of single cell transcriptomics and
+epigenomics induces novel and challenging
+requirements for bioinformatic preprocessing, analysis
+throughput, and storage.  It seems safe to say that
+biological variability at the single cell level
+will necessitate assays of hundreds to thousands
+of cells per individual to answer basic questions
+of interest.  Consequently one can anticipate
+needs for storage and analysis infrastructure that
+are several orders of magnitude larger and faster
+than those currently in use.  
+
+As computational
+and statistical methods for analysis of "big data"
+evolve, biologists and statisticians must weigh
+various options for basic aspects of their work:
+
+- how to store and refine assay data, 
+- how to manage
+relationships between assay quantifications and
+experiment and sample-level metadata, 
+- how to efficiently interpret experimental outcomes, making
+use of, and contributing to, the evolving store
+of biological knowledge.
+
+There is no standard toolbox to address all these
+concerns.  We know of no clear criteria to help practitioners
+choose among available tools to solve new problems arising
+with high volume single cell genomics.
+
+The Bioconductor project (cite orchestrating paper) has
+provided tools for preprocessing genome-scale assays,
+archiving collections of assays for interactive
+refinement and analysis, and using and adding to 
+institutional archives of genome-scale annotation
+and experiments.  In this report we review early
+responses of the project to opportunities and
+challenges arising in single-cell genomics.
+
+# Exemplar: The 10x million-neuron dataset
+
+The 1.3 million neuron single cell dataset published
+by 10x genomics (url) helps set the
+stage for strategic considerations.  The data consist
+of counts of reads for 27998 genes.  The native
+representation is sparse -- all zero cells in the
+gene x cell matrix are omitted, and vectors of
+sample id, gene id, and count for gene in sample are
+assembled in an HDF5 archive.  
+
+Specifically, the 2.624 billion non-zero counts obtained
+from the 1.3 million cells form
+an integer vector with elements $c_i$.  These are indexed using
+two
+vectors: $g$ (conformant with $c$) and $s$ (one entry per
+cell).  Element $g_i$ tells which gene gives rise to count $c_i$,
+and the cell giving rise to this count is
+cell $k$ satisfying $s_k \leq i < s_{k+1}$.
+
+## The TENxGenomics package
+
+[We'll assume the path to the HDF5 1Mneurons dataset is
+in the environment variable TENX_H5_PATH]
+
+The TENxGenomics package works with local access
+to the the 4.2 GB HDF5 file distributed
+by 10x.
+```{r setup,echo=FALSE,results="hide"}
+suppressPackageStartupMessages({
+library(TENxGenomics)
+library(restfulSE)
+library(BiocSklearn)
+})
+```
+```{r doit1}
+library(TENxGenomics)
+h5path = Sys.getenv("TENX_H5_PATH")
+txg = TENxGenomics(h5path)
+txg
+```
+
+The `txg` object can be subsetted as if it were an R matrix:
+```{r lksb}
+txg[1:10,1:10]
+```
+The indexes used with bracket need not be numerical, as we
+will illustrate shortly.  
+
+Counts can be retrieved using the `as.matrix` method.
+To demonstrate this, we will obtain a vector of Ensembl
+gene identifiers that are reported by Tasic et al. 2016 as
+constitutively expressed in the cerebral cortex of the
+adult mouse.
+
+```{r dotas}
+library(restfulSE)
+cn = tasicCortex()
+head(cn)
+as.matrix(txg[cn$GENEID[1:5],1:5])
+```
+
+A hallmark of Bioconductor is support for semantically
+rich, coordinated containers for genome-scale data.  The
+SummarizedExperiment object design is discussed in some
+detail in [orch paper].  The neuron data can be
+represented in this form:
+```{r getse, cache=TRUE}
+txse = tenxSummarizedExperiment(h5path)
+txse
+```
+
+[NB at this time assay(txse) fails for me.]
+
+## The restfulSE package
+
+We have utilized the HDF5 server technology [cite]
+to provide access to a dense re-expression of the
+million neuron dataset.  Here we have 'rows' corresponding
+to cells and 'columns' corresponding to genes, and
+the $r, c$ element of the HDF5 array is the count for
+sample $c$ of gene $r$.  Zeroes are present, but thanks
+to HDF5's compression, the archive size is 5.96 GB,
+an inflation of 1.9 GB over the sparse format.
+
+The SummarizedExperiment representation for
+this remote resource is:
+```{r dores}
+library(restfulSE)
+remse = se1.3M()
+remse
+```
+
+For targeted queries, the remote resource can be
+more performant than the local sparse resource, although
+this comparison will depend on network performance.
+```{r docomp}
+system.time(print(sum(as.matrix(txg[cn[1,2], 1:1000]))))
+system.time(print(sum(assay(remse[cn[1,2], 1:1000]))))
+```
