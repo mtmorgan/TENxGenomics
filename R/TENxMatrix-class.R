@@ -96,9 +96,13 @@ TENxMatrixSeed <- function(h5path, group="mm10")
     dimnames <- list(rownames, colnames)
 
     ## col_ranges
-    data_len <- HDF5Array:::h5dim(h5path, paste0(group, "/data"))
+    ## "/data" and "/indices" are monodimensional arrays of length >= 2^31 so
+    ## we need to call h5dim() with 'check=FALSE'.
+    data_len <- HDF5Array:::h5dim(h5path, paste0(group, "/data"),
+                                  check=FALSE)
     stopifnot(length(data_len) == 1L)
-    indices_len <- HDF5Array:::h5dim(h5path, paste0(group, "/indices"))
+    indices_len <- HDF5Array:::h5dim(h5path, paste0(group, "/indices"),
+                                  check=FALSE)
     stopifnot(identical(data_len, indices_len))
     indptr <- .get_indptr(h5path, group)
     stopifnot(length(indptr) == dim[[2L]] + 1L,
@@ -142,13 +146,13 @@ setMethod("dimnames", "TENxMatrixSeed", function(x) x@dimnames)
     seq_len(sum(lengths)) + rep.int(offsets, lengths)
 }
 
-.subset_TENxMatrixSeed_as_array <- function(seed, index)
+.extract_array_from_TENxMatrixSeed <- function(x, index)
 {
     ans_dim <- DelayedArray:::get_Nindex_lengths(index, dim(seed))
     ans <- array(0L, dim=ans_dim)
 
     j <- index[[2L]]
-    col_ranges <- seed@col_ranges
+    col_ranges <- x@col_ranges
     if (is.null(j)) {
         j <- seq_len(ncol(ans))
     } else {
@@ -157,7 +161,7 @@ setMethod("dimnames", "TENxMatrixSeed", function(x) x@dimnames)
     start2 <- col_ranges[ , "start"]
     width2 <- col_ranges[ , "width"]
     idx2 <- .fancy_mseq(width2, offset=start2 - 1)
-    i2 <- .get_indices(seed@file, seed@group, idx=idx2) + 1L
+    i2 <- .get_indices(x@file, x@group, idx=idx2) + 1L
     j2 <- rep.int(seq_along(j), width2)
 
     i <- index[[1L]]
@@ -168,12 +172,12 @@ setMethod("dimnames", "TENxMatrixSeed", function(x) x@dimnames)
         j2 <- j2[from(m)]
     }
 
-    ans[cbind(i2, j2)] <- .get_data(seed@file, seed@group, idx=idx2)
+    ans[cbind(i2, j2)] <- .get_data(x@file, x@group, idx=idx2)
     ans
 }
 
-setMethod("subset_seed_as_array", "TENxMatrixSeed",
-    .subset_TENxMatrixSeed_as_array
+setMethod("extract_array", "TENxMatrixSeed",
+    .extract_array_from_TENxMatrixSeed
 )
 
 #' @rdname TENxMatrix-class
