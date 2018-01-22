@@ -80,22 +80,32 @@ cell $k$ satisfying $s_k \leq i < s_{k+1}$.
 
 ## The TENxGenomics package
 
-[We'll assume the path to the HDF5 1Mneurons dataset is
-in the environment variable TENX_H5_PATH]
-
 The TENxGenomics package works with local access
 to the the 4.2 GB HDF5 file distributed
-by 10x.
+by 10x. The file is maintained through [BiocFileCache][]
+
+[BiocFileCache]: https://bioconductor.org/packages/BiocFileCache
+
 ```{r setup,echo=FALSE,results="hide"}
 suppressPackageStartupMessages({
-library(TENxGenomics)
-library(restfulSE)
-library(BiocSklearn)
+    library(TENxGenomics)
+    library(restfulSE)
+    library(BiocSklearn)
 })
 ```
+
 ```{r doit1}
 library(TENxGenomics)
-h5path = Sys.getenv("TENX_H5_PATH")
+library(BiocFileCache)
+bfc <- BiocFileCache()
+
+oneM <- paste0(
+    "https://s3-us-west-2.amazonaws.com/10x.files/",
+    "samples/cell/1M_neurons/",
+    "1M_neurons_filtered_gene_bc_matrices_h5.h5"
+)
+h5path <- bfcrpath(bfc, oneM)
+
 txg = TENxGenomics(h5path)
 txg
 ```
