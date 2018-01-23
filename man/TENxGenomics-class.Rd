@@ -15,7 +15,7 @@
 \alias{coerce,TENxGenomics,dgCMatrix-method}
 \title{Create and manipulate a reference to 10xGenomics data.}
 \usage{
-TENxGenomics(h5path)
+TENxGenomics(h5path, group = "mm10")
 
 \S4method{dim}{TENxGenomics}(x)
 
@@ -31,6 +31,9 @@ as.dgCMatrix(x, ..., withDimnames = TRUE)
 }
 \arguments{
 \item{h5path}{character(1) file path to a 1M_neurons_*.h5 file.}
+
+\item{group}{character(1) hdf5 group (e.g., \dQuote{mm10}) containing
+scRNA-seq data.}
 
 \item{x}{A \code{TENxGenomics-class} instance.}
 

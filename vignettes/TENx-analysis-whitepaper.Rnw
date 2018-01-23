@@ -1,5 +1,8 @@
 \documentclass{article}
 
+%\VignetteIndexEntry{Draft white paper (DEFUNCT)}
+%\VignetteEncoding{UTF-8}
+
 <<style-Sweave, eval=TRUE, echo=FALSE, results=tex>>=
 BiocStyle::latex()
 @ 
