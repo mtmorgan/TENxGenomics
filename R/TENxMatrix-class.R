@@ -148,7 +148,7 @@ setMethod("dimnames", "TENxMatrixSeed", function(x) x@dimnames)
 
 .extract_array_from_TENxMatrixSeed <- function(x, index)
 {
-    ans_dim <- DelayedArray:::get_Nindex_lengths(index, dim(seed))
+    ans_dim <- DelayedArray:::get_Nindex_lengths(index, dim(x))
     ans <- array(0L, dim=ans_dim)
 
     j <- index[[2L]]
