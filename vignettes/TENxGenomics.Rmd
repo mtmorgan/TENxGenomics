@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 suppressPackageStartupMessages({
     library(TENxGenomics)
     library(BiocFileCache)
+    library(HDF5Array)
     library(SummarizedExperiment)
     library(Rtsne)
 })
@@ -306,3 +307,4 @@ sessionInfo()
 [BiocFileCache]: https://bioconductor.org/packages/BiocFileCache
 [SummarizedExperiment]: https://bioconductor.org/packages/SummarizedExperiment
 [DelayedArray]: https://bioconductor.org/packages/DelayedArray
+[HDF5Array]: https://bioconductor.org/packages/HDF5Array
