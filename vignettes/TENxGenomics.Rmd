@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 suppressPackageStartupMessages({
     library(TENxGenomics)
     library(BiocFileCache)
+    library(HDF5Array)
     library(SummarizedExperiment)
     library(Rtsne)
 })
@@ -104,16 +105,18 @@ as.matrix(tenx[sample(nrow(tenx), 5), sample(ncol(tenx), 3)])
 ## Using a TENxMatrix object
 
 An alternative to creating `TENxGenomics` object `tenx` is to wrap the
-10xGenomics data in a `TENxMatrix` object.
+10xGenomics data in a `TENxMatrix` object. The `TENxMatrix` container is
+implemented in the [HDF5Array][] package.
 
 ```{r}
+library(HDF5Array)
 tenxmat <- TENxMatrix(path)
 ```
 
 The `TENxMatrix` class extends the `DelayedArray` class defined in the
 [DelayedArray][] package so all the operations available on `DelayedArray`
-objects work on `TENxMatrix` objects. See `?DelayedArray` for more
-information.
+objects work on `TENxMatrix` objects. See `?TENxMatrix` and `?DelayedArray`
+for more information.
 
 ## Rich
 
@@ -304,3 +307,4 @@ sessionInfo()
 [BiocFileCache]: https://bioconductor.org/packages/BiocFileCache
 [SummarizedExperiment]: https://bioconductor.org/packages/SummarizedExperiment
 [DelayedArray]: https://bioconductor.org/packages/DelayedArray
+[HDF5Array]: https://bioconductor.org/packages/HDF5Array
